@@ -26,13 +26,14 @@ that you spawned in when entering a one-way-portal)
 
 # non-buildable structures in the enderworld
 ## one-way-portals
-- destroys 3x3x3 blocks in the overworld on the same location on entering
+- destroys 3x3x3 blocks in the overworld on the same location on entering and create a platform out of stone
 - the y coordinate doesn't change, so you are probably trapped in stone, keep a pickaxe with you on going through
 ## pocket-portal
-- only a Techo Enderling can enter
+- only a Techno Enderling can enter
 - can't be destroyed in survival (maybe because it's out of bedrock)
 - very big
 - can be accessed through boats and minecarts
+- a Techno Enderling can repair a broken pocket portal no matter the blocks
 ### pocket dimension
 - teleports the player to the last pocket portal the player used
 ### enderworld
