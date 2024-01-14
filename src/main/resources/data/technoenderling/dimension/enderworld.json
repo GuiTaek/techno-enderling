@@ -1,0 +1,13 @@
+{
+  "type": "technoenderling:enderworld",
+  "generator": {
+    "seed": 0,
+    "type": "minecraft:noise",
+    "biome_source": {
+      "seed": 0,
+      "type": "minecraft:fixed",
+      "biome": "technoenderling:enderworld_wastes"
+    },
+    "settings": "technoenderling:enderworld"
+  }
+}
