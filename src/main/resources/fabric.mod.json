@@ -16,7 +16,10 @@
 	"environment": "*",
 	"entrypoints": {
 		"main": [
-			"com.gmail.guitaekm.technoenderling.Technoenderling"
+			"com.gmail.guitaekm.technoenderling.TechnoEnderling"
+		],
+		"client": [
+			"com.gmail.guitaekm.technoenderling.TechnoEnderlingClient"
 		]
 	},
 	"mixins": [
