@@ -30,7 +30,20 @@
             "weirdness": 0.1,
             "offset": 0.8
           }
-        }+      ],
+        },
+        {
+          "biome": "technoenderling:enderworld_foggy_forest",
+          "parameters": {
+            "continentalness": 0,
+            "depth": 0,
+            "erosion": 0,
+            "temperature": -0.8,
+            "humidity": 0.3,
+            "weirdness": 1,
+            "offset": 0.3
+          }
+        }
+      ],
       "altitude_noise": {
         "firstOctave": -7,
         "amplitudes": [
