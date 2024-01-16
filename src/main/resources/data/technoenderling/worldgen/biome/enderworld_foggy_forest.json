@@ -12,7 +12,13 @@
     "sky_color": 4010652,
     "water_color": 3866869,
     "water_fog_color": 4595418,
-    "grass_color_modifier": "none"
+    "grass_color_modifier": "none",
+    "particle": {
+      "options": {
+        "type": "minecraft:large_smoke"
+      },
+      "probability": 0.3
+    }
   },
   "carvers": {
     "air": [],
