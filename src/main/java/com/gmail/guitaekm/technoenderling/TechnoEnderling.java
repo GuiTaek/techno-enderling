@@ -3,6 +3,8 @@ package com.gmail.guitaekm.technoenderling;
 import com.gmail.guitaekm.technoenderling.particle.ModParticles;
 import net.fabricmc.api.ModInitializer;
 
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
