@@ -91,7 +91,7 @@ that you spawned in when entering a one-way-portal)
     - 16 strings
     - 16 gunpowder
 ### weak ender reactor
-- mantle: end stone
+- mantle: magenta or purple glass
 - sacrifice: 1 ender pearl
 - spawns an enderman every some minutes
 ### strong ender reactor
