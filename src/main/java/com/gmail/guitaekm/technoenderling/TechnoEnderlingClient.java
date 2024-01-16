@@ -10,6 +10,5 @@ public class TechnoEnderlingClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         ParticleFactoryRegistry.getInstance().register(ModParticles.ENDERWORLD_PARTICLE, EnderworldParticle.Factory::new);
-        FogDatapackLoader.registerFog();
     }
 }

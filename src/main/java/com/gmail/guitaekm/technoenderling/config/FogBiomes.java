@@ -16,4 +16,8 @@ public class FogBiomes {
     public static boolean isFogBiome(String biome) {
         return FogBiomes.biomes.contains(biome);
     }
+
+    public static void clear() {
+        FogBiomes.biomes.clear();
+    }
 }

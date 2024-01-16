@@ -1,5 +1,6 @@
 package com.gmail.guitaekm.technoenderling;
 
+import com.gmail.guitaekm.technoenderling.config.ModResources;
 import com.gmail.guitaekm.technoenderling.event.ModEvents;
 import com.gmail.guitaekm.technoenderling.particle.ModParticles;
 import net.fabricmc.api.ModInitializer;
@@ -20,5 +21,6 @@ public class TechnoEnderling implements ModInitializer {
 	public void onInitialize() {
 		ModParticles.registerParticles();
 		ModEvents.registerEvents();
+		ModResources.registerResources();
 	}
 }
