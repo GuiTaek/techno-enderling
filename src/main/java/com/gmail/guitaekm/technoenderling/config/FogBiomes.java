@@ -1,13 +1,11 @@
 package com.gmail.guitaekm.technoenderling.config;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class FogBiomes {
-    static protected Map<String, FogBiomeSetting> biomes = new HashMap<>();
-    public static void addBiome(String biome, float minDistance, float maxDistance) {
-        FogBiomes.biomes.put(biome, new FogBiomeSetting(minDistance, maxDistance));
+    static protected Set<String> biomes = new HashSet<>();
+    public static void addBiome(String biome) {
+        FogBiomes.biomes.add(biome);
     }
 
     public static void removeBiome(String biome) {
@@ -16,26 +14,6 @@ public class FogBiomes {
     }
 
     public static boolean isFogBiome(String biome) {
-        return FogBiomes.biomes.containsKey(biome);
-    }
-
-    public static Optional<FogBiomeSetting> getBiomeSetting(String biome) {
-        if (!FogBiomes.biomes.containsKey(biome)) {
-            return Optional.empty();
-        }
-        return Optional.of(FogBiomes.biomes.get(biome));
-    }
-    public static Optional<Float> getMinDistance(String biome) {
-        if (!FogBiomes.isFogBiome(biome)) {
-            return Optional.empty();
-        }
-        return Optional.of(FogBiomes.biomes.get(biome).minDistance());
-    }
-
-    public static Optional<Float> getMaxDistance(String biome) {
-        if (!FogBiomes.isFogBiome(biome)) {
-            return Optional.empty();
-        }
-        return Optional.of(FogBiomes.biomes.get(biome).maxDistance());
+        return FogBiomes.biomes.contains(biome);
     }
 }
