@@ -1,7 +1,15 @@
 # general mod concept: Techo Enderling
-- is an origin
-- is a full-fledged mod
-
+# becoming a Techno Enderling
+- you have to eat a special food that can be buyed from the wandering trader
+and be crafted from a warped fungus and an ender pearl
+- when eaten it grants an effect and nausea
+- when dying due to an enderman whilst under this effect, you respawn (even in hardcore)
+as an Techno Enderling on your bed
+- cheating hardcore by eating the food that make you the creature you already are
+doesn't work
+- there is a similar food crafted from a brown mushroom that can transform you back into
+a human
+- whilst under the effect, every enderman seeing you is angry at you
 # general portal infos
 ## take entities, players, villagers with you
 - you can enter the portals also while riding an entity like a boat, a minecart or a horse (variant)
