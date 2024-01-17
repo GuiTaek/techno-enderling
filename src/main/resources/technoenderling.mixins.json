@@ -3,7 +3,8 @@
 	"package": "com.gmail.guitaekm.technoenderling.mixin",
 	"compatibilityLevel": "JAVA_17",
 	"mixins": [
-		"ExampleMixin"
+		"ExampleMixin",
+		"BlocksMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
