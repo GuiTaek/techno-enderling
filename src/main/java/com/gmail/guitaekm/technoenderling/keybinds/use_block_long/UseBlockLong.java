@@ -1,5 +1,7 @@
-package com.gmail.guitaekm.technoenderling.keybinds;
+package com.gmail.guitaekm.technoenderling.keybinds.use_block_long;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.block.Block;
 import net.minecraft.client.MinecraftClient;
@@ -8,6 +10,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
+@Environment(EnvType.CLIENT)
 public class UseBlockLong {
 
     static public class SavedUsage {
@@ -20,7 +23,7 @@ public class UseBlockLong {
         }
     }
 
-    final private static List<UseBlockLongListenerInstance> listeners = new ArrayList<>();
+    final private static List<ListenerInstance> listeners = new ArrayList<>();
     private static @Nullable SavedUsage current = null;
     public static void registerClass() {
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
@@ -45,13 +48,13 @@ public class UseBlockLong {
             UseBlockLong.current = null;
         });
     }
-    public static UseBlockLongListenerInstance registerListener(Block block, int maxAge, UseBlockLongCallback callback) {
-        UseBlockLongListenerInstance listener = new UseBlockLongListenerInstance(block, maxAge, callback, false);
+    public static ListenerInstance registerListener(Block block, int maxAge, Callback callback) {
+        ListenerInstance listener = new ListenerInstance(block, maxAge, callback, false);
         UseBlockLong.listeners.add(listener);
         return listener;
     }
 
-    public static boolean deregisterListener(UseBlockLongListenerInstance listener) {
+    public static boolean deregisterListener(ListenerInstance listener) {
         return UseBlockLong.listeners.remove(listener);
     }
     protected static Optional<Block> getTargetBlock(MinecraftClient client) {
@@ -69,14 +72,14 @@ public class UseBlockLong {
         return Optional.of(targetBlock);
     }
     protected static void refreshListenerInstances() {
-        UseBlockLong.listeners.forEach((UseBlockLongListenerInstance listener) -> listener.dead = false);
+        UseBlockLong.listeners.forEach((ListenerInstance listener) -> listener.dead = false);
     }
-    protected static List<UseBlockLongListenerInstance> iterateOverCallbacks(Block targetBlock) {
+    protected static List<ListenerInstance> iterateOverCallbacks(Block targetBlock) {
         if (current == null) {
             return new ArrayList<>();
         }
-        List<UseBlockLongListenerInstance> listeners = new ArrayList<>();
-        for(UseBlockLongListenerInstance entry : UseBlockLong.listeners) {
+        List<ListenerInstance> listeners = new ArrayList<>();
+        for(ListenerInstance entry : UseBlockLong.listeners) {
             if (current.age <= entry.maxAge) {
                 if (entry.block == targetBlock) {
                     if (!entry.dead) {
@@ -119,7 +122,7 @@ public class UseBlockLong {
             return;
         }
         current = new SavedUsage(targetBlockOptional.get(), 0);
-        for(UseBlockLongListenerInstance listener : UseBlockLong.iterateOverCallbacks(targetBlockOptional.get())) {
+        for(ListenerInstance listener : UseBlockLong.iterateOverCallbacks(targetBlockOptional.get())) {
             listener.callback.onStartUse(client, client.world, client.player);
         }
     }
@@ -135,7 +138,7 @@ public class UseBlockLong {
             // shouldn't happen, but safeguard
             throw new IllegalArgumentException();
         }
-        for(UseBlockLongListenerInstance listener : UseBlockLong.iterateOverCallbacks(targetBlockOptional.get())) {
+        for(ListenerInstance listener : UseBlockLong.iterateOverCallbacks(targetBlockOptional.get())) {
             listener.callback.onUseTick(client, client.world, client.player, current.age);
         }
     }
@@ -144,7 +147,7 @@ public class UseBlockLong {
             return;
         }
         if (UseBlockLong.hasSameTarget(client)) {
-            for(UseBlockLongListenerInstance listener : UseBlockLong.iterateOverCallbacks(current.block)) {
+            for(ListenerInstance listener : UseBlockLong.iterateOverCallbacks(current.block)) {
                 if (current.age == listener.maxAge) {
                     listener.callback.onEndUse(client, client.world, client.player, current.age);
                     listener.dead = true;
@@ -152,7 +155,7 @@ public class UseBlockLong {
             }
             return;
         }
-        for(UseBlockLongListenerInstance listener : UseBlockLong.iterateOverCallbacks(current.block)) {
+        for(ListenerInstance listener : UseBlockLong.iterateOverCallbacks(current.block)) {
             listener.callback.onEndUse(client, client.world, client.player, current.age);
             listener.dead = true;
         }
