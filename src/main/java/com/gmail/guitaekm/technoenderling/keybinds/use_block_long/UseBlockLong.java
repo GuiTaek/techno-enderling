@@ -4,21 +4,23 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-@Environment(EnvType.CLIENT)
+
 public class UseBlockLong {
 
     static public class SavedUsage {
-        public Block block;
+        public BlockPos pos;
         public int age;
 
-        public SavedUsage(Block block, int age) {
-            this.block = block;
+        public SavedUsage(BlockPos pos, int age) {
+            this.pos = pos;
             this.age = age;
         }
     }
@@ -48,8 +50,8 @@ public class UseBlockLong {
             UseBlockLong.current = null;
         });
     }
-    public static ListenerInstance registerListener(Block block, int maxAge, Callback callback) {
-        ListenerInstance listener = new ListenerInstance(block, maxAge, callback, false);
+    public static ListenerInstance registerListener(int maxAge, CallbackClient callback) {
+        ListenerInstance listener = new ListenerInstance(maxAge, callback, false);
         UseBlockLong.listeners.add(listener);
         return listener;
     }
@@ -57,7 +59,7 @@ public class UseBlockLong {
     public static boolean deregisterListener(ListenerInstance listener) {
         return UseBlockLong.listeners.remove(listener);
     }
-    protected static Optional<Block> getTargetBlock(MinecraftClient client) {
+    protected static Optional<BlockPos> getTargetBlockPos(MinecraftClient client) {
         if (client.crosshairTarget == null) {
             return Optional.empty();
         }
@@ -68,23 +70,20 @@ public class UseBlockLong {
             // don't ask me why the main menu is already ticking
             return Optional.empty();
         }
-        Block targetBlock = client.world.getBlockState(result.getBlockPos()).getBlock();
-        return Optional.of(targetBlock);
+        return Optional.of(result.getBlockPos());
     }
     protected static void refreshListenerInstances() {
         UseBlockLong.listeners.forEach((ListenerInstance listener) -> listener.dead = false);
     }
-    protected static List<ListenerInstance> iterateOverCallbacks(Block targetBlock) {
+    protected static List<ListenerInstance> iterateOverCallbacks() {
         if (current == null) {
             return new ArrayList<>();
         }
         List<ListenerInstance> listeners = new ArrayList<>();
         for(ListenerInstance entry : UseBlockLong.listeners) {
             if (current.age <= entry.maxAge) {
-                if (entry.block == targetBlock) {
-                    if (!entry.dead) {
-                        listeners.add(entry);
-                    }
+                if (!entry.dead) {
+                    listeners.add(entry);
                 }
             }
         }
@@ -94,7 +93,7 @@ public class UseBlockLong {
         if (!client.options.keyUse.isPressed()) {
             return false;
         }
-        Optional<Block> targetBlockOptional = UseBlockLong.getTargetBlock(client);
+        Optional<BlockPos> targetBlockOptional = UseBlockLong.getTargetBlockPos(client);
         if (targetBlockOptional.isEmpty()) {
             return false;
         }
@@ -104,26 +103,26 @@ public class UseBlockLong {
         if (!client.options.keyUse.isPressed()) {
             return false;
         }
-        Optional<Block> targetBlockOptional = UseBlockLong.getTargetBlock(client);
+        Optional<BlockPos> targetBlockOptional = UseBlockLong.getTargetBlockPos(client);
         if (targetBlockOptional.isEmpty()) {
             return false;
         }
         if (current == null) {
             return false;
         }
-        return targetBlockOptional.get() == current.block;
+        return targetBlockOptional.get().equals(current.pos);
     }
     protected static void callAllOnStartUse(MinecraftClient client) {
         if (UseBlockLong.hasSameTarget(client)) {
             return;
         }
-        Optional<Block> targetBlockOptional = UseBlockLong.getTargetBlock(client);
+        Optional<BlockPos> targetBlockOptional = UseBlockLong.getTargetBlockPos(client);
         if (targetBlockOptional.isEmpty()) {
             return;
         }
         current = new SavedUsage(targetBlockOptional.get(), 0);
-        for(ListenerInstance listener : UseBlockLong.iterateOverCallbacks(targetBlockOptional.get())) {
-            listener.callback.onStartUse(client, client.world, client.player);
+        for(ListenerInstance listener : UseBlockLong.iterateOverCallbacks()) {
+            listener.callback.onStartUse(client, client.world, client.player, UseBlockLong.getTargetBlockPos(client).get());
         }
     }
     protected static void callAllOnUseTick(MinecraftClient client) {
@@ -133,13 +132,8 @@ public class UseBlockLong {
         if (current == null) {
             throw new IllegalArgumentException("The method before should eliminate current being null. However, that's not the case");
         }
-        Optional<Block> targetBlockOptional = UseBlockLong.getTargetBlock(client);
-        if (targetBlockOptional.isEmpty()) {
-            // shouldn't happen, but safeguard
-            throw new IllegalArgumentException();
-        }
-        for(ListenerInstance listener : UseBlockLong.iterateOverCallbacks(targetBlockOptional.get())) {
-            listener.callback.onUseTick(client, client.world, client.player, current.age);
+        for(ListenerInstance listener : UseBlockLong.iterateOverCallbacks()) {
+            listener.callback.onUseTick(client, client.world, client.player, UseBlockLong.getTargetBlockPos(client).get(), current.age);
         }
     }
     protected static void callAllOnEndUse(MinecraftClient client) {
@@ -147,16 +141,16 @@ public class UseBlockLong {
             return;
         }
         if (UseBlockLong.hasSameTarget(client)) {
-            for(ListenerInstance listener : UseBlockLong.iterateOverCallbacks(current.block)) {
+            for(ListenerInstance listener : UseBlockLong.iterateOverCallbacks()) {
                 if (current.age == listener.maxAge) {
-                    listener.callback.onEndUse(client, client.world, client.player, current.age);
+                    listener.callback.onEndUse(client, client.world, client.player, UseBlockLong.getTargetBlockPos(client).get(), current.age);
                     listener.dead = true;
                 }
             }
             return;
         }
-        for(ListenerInstance listener : UseBlockLong.iterateOverCallbacks(current.block)) {
-            listener.callback.onEndUse(client, client.world, client.player, current.age);
+        for(ListenerInstance listener : UseBlockLong.iterateOverCallbacks()) {
+            listener.callback.onEndUse(client, client.world, client.player, UseBlockLong.getTargetBlockPos(client).get(), current.age);
             listener.dead = true;
         }
     }

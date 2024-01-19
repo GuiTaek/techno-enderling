@@ -1,10 +1,9 @@
 package com.gmail.guitaekm.technoenderling.event;
 
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.fabricmc.fabric.api.event.server.ServerTickCallback;
 
-public class ModEvents {
+public class ModEventsServer {
     public static void registerEvents() {
-        ServerTickEvents.END_SERVER_TICK.register(new DarknessApplier());
+        ServerTickEvents.END_SERVER_TICK.register(new DarknessApplierServer());
     }
 }

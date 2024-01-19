@@ -15,12 +15,13 @@
 	"icon": "assets/technoenderling/icon.png",
 	"environment": "*",
 	"entrypoints": {
+		"server": [
+			"com.gmail.guitaekm.technoenderling.TechnoEnderlingServer"
+		],
 		"main": [
 			"com.gmail.guitaekm.technoenderling.TechnoEnderling"
 		],
-		"client": [
-			"com.gmail.guitaekm.technoenderling.TechnoEnderlingClient"
-		]
+		"client": []
 	},
 	"mixins": [
 		"technoenderling.mixins.json"

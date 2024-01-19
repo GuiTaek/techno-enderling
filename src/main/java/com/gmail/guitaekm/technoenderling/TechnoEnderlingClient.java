@@ -1,16 +1,23 @@
 package com.gmail.guitaekm.technoenderling;
 
-import com.gmail.guitaekm.technoenderling.config.FogDatapackLoader;
+import com.gmail.guitaekm.technoenderling.event.ModEventsClient;
+import com.gmail.guitaekm.technoenderling.keybinds.ModKeybindsClient;
 import com.gmail.guitaekm.technoenderling.keybinds.RegisterKeyBinds;
+import com.gmail.guitaekm.technoenderling.networking.ModNetworking;
 import com.gmail.guitaekm.technoenderling.particle.ModParticles;
 import com.gmail.guitaekm.technoenderling.particle.custom.EnderworldParticle;
+import com.gmail.guitaekm.technoenderling.resources.ModResourcesClient;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry;
 
-public class TechnoEnderlingClient implements ClientModInitializer {
-    @Override
+public class TechnoEnderlingClient {
     public void onInitializeClient() {
         ParticleFactoryRegistry.getInstance().register(ModParticles.ENDERWORLD_PARTICLE, EnderworldParticle.Factory::new);
         RegisterKeyBinds.registerKeyBinds();
+        ModNetworking.registerNetworkingClient();
+        ModParticles.registerParticles();
+        ModEventsClient.registerEvents();
+        ModResourcesClient.register();
+        ModKeybindsClient.register();
     }
 }

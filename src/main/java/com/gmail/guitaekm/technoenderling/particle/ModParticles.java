@@ -1,6 +1,7 @@
 package com.gmail.guitaekm.technoenderling.particle;
 
 import com.gmail.guitaekm.technoenderling.TechnoEnderling;
+import com.gmail.guitaekm.technoenderling.TechnoEnderlingServer;
 import net.fabricmc.fabric.api.particle.v1.FabricParticleTypes;
 import net.minecraft.particle.DefaultParticleType;
 import net.minecraft.util.Identifier;

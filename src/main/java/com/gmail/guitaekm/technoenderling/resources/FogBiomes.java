@@ -1,4 +1,4 @@
-package com.gmail.guitaekm.technoenderling.config;
+package com.gmail.guitaekm.technoenderling.resources;
 
 import java.util.*;
 

@@ -1,11 +1,16 @@
-package com.gmail.guitaekm.technoenderling.config;
+package com.gmail.guitaekm.technoenderling.resources;
 
 import com.gmail.guitaekm.technoenderling.TechnoEnderling;
+import com.gmail.guitaekm.technoenderling.TechnoEnderlingServer;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
 import net.minecraft.resource.ResourceManager;
+import net.minecraft.resource.ResourceType;
 import net.minecraft.util.Identifier;
 import org.apache.commons.io.IOUtils;
 
@@ -20,7 +25,7 @@ public class FogDatapackLoader {
 
         @Override
         public Identifier getFabricId() {
-            return new Identifier("technoenderling", "resources");
+            return new Identifier("technoenderling", "fog_biomes");
         }
 
         @Override
@@ -38,5 +43,8 @@ public class FogDatapackLoader {
 
             }
         }
+    }
+    public static void register() {
+        ResourceManagerHelper.get(ResourceType.SERVER_DATA).registerReloadListener(new FogDatapackLoader.Listener());
     }
 }
