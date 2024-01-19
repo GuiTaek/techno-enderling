@@ -1,5 +1,6 @@
 package com.gmail.guitaekm.technoenderling;
 
+import com.gmail.guitaekm.technoenderling.blocks.ModBlocks;
 import com.gmail.guitaekm.technoenderling.event.ModEventsClient;
 import com.gmail.guitaekm.technoenderling.keybinds.ModKeybindsClient;
 import com.gmail.guitaekm.technoenderling.keybinds.RegisterKeyBinds;

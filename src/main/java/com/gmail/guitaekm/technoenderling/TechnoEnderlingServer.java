@@ -1,5 +1,6 @@
 package com.gmail.guitaekm.technoenderling;
 
+import com.gmail.guitaekm.technoenderling.blocks.ModBlocks;
 import com.gmail.guitaekm.technoenderling.features.ConvertibleDatapackStructure;
 import com.gmail.guitaekm.technoenderling.features.EnderlingStructureRegistry;
 import com.gmail.guitaekm.technoenderling.resources.ModResourcesServer;
@@ -20,6 +21,7 @@ import org.slf4j.LoggerFactory;
 public class TechnoEnderlingServer implements DedicatedServerModInitializer {
 	@Override
 	public void onInitializeServer() {
+		ModBlocks.register();
 		ModEventsServer.registerEvents();
 		ModResourcesServer.registerResources();
 		ModNetworking.registerNetworkingServer();
