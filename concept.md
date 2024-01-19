@@ -2,9 +2,9 @@
 # becoming a Techno Enderling
 - you have to eat a special food that can be buyed from the wandering trader
 and be crafted from a warped fungus and an ender pearl
-- when eaten it grants an effect, nausea and weakness
+- when eaten in a soup or a potion grants an effect, nausea and weakness
 - when dying due to an enderman whilst under this effect, you respawn (even in hardcore)
-as an Techno Enderling on your bed
+as an Techno Enderling on world spawn without a set spawn
 - cheating hardcore by eating the food that make you the creature you already are
 doesn't work
 - there is a similar food crafted from a brown mushroom that can transform you back into
