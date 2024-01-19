@@ -1,8 +1,8 @@
-# general mod concept: Techo Enderling
+# general mod concept: Techno Enderling
 # becoming a Techno Enderling
 - you have to eat a special food that can be buyed from the wandering trader
 and be crafted from a warped fungus and an ender pearl
-- when eaten it grants an effect and nausea
+- when eaten it grants an effect, nausea and weakness
 - when dying due to an enderman whilst under this effect, you respawn (even in hardcore)
 as an Techno Enderling on your bed
 - cheating hardcore by eating the food that make you the creature you already are
@@ -10,6 +10,7 @@ doesn't work
 - there is a similar food crafted from a brown mushroom that can transform you back into
 a human
 - whilst under the effect, every enderman seeing you is angry at you
+- you can decide at the start of the game to be a Techno Enderling and the food isn't craftable or both not (gamerule)
 # general portal infos
 ## take entities, players, villagers with you
 - you can enter the portals also while riding an entity like a boat, a minecart or a horse (variant)
@@ -36,6 +37,7 @@ that you spawned in when entering a one-way-portal)
 ## one-way-portals
 - destroys 3x3x3 blocks in the overworld on the same location on entering and create a platform out of stone
 - the y coordinate doesn't change, so you are probably trapped in stone, keep a pickaxe with you on going through
+- maybe it splits you out at surface level yet, but x/z is correct
 ## pocket-portal
 - only a Techno Enderling can enter
 - can't be destroyed in survival (maybe because it's out of bedrock)
@@ -59,16 +61,14 @@ that you spawned in when entering a one-way-portal)
 - the y coordinate is exact on building
 - consumes while activating 2 gold blocks and 1 glowstone block
 - teleports to the nearest y-wise portal
-- will break 3x3 blocks on activation on the other side (not when going through)
-- will load the other side for 15 seconds, just like nether portals
+- will break 3x3 blocks on activation on the other side (not when going through) and, if necessary, a plattform of endstone (that must be provided)
 ### overworld
 - lead to the enderworld
 - the x,z coordinate is random in the chunk, the y coordinate is exact
 - on activation it clears out a 3x2x3 area
 - consumes while activating 2 gold blocks and 1 glowstone block
 - teleports to the nearest y-wise portal
-- will break 3x3 blocks on activation on the other side (not when going through)
-- will load the other side for 15 seconds, just like nether portals
+- will break 3x3 blocks on activation on the other side (not when going through) and, if necessary, a plattform of Stone (that must be provided)
 
 ### nether
 - because of the nether being so intertwined, you can use the portal here to teleport to known other portals in the nether
@@ -76,11 +76,11 @@ that you spawned in when entering a one-way-portal)
 
 ### end
 - you spawn on your spawn, just as if you've gone through the end-portal
-- if your spawn in in the end, then you spawn in the overworld at world spawn
-
+- if your spawn in in the end, then you spawn in the overworld at world spawn or the enderworld, depending on who you are
 
 ## enderling anchor
 - only Techno Enderlings can use them
+- if a non-Techno-Enderling uses them, they explode
 - on every other dimension than the pocket dimension, you reset your spawn point there
 - works on every dimension, including the nether and the end
 - on the pocket dimension it teleports you to your spawn point on holding right click (so it can't be abused as easy block breaker)
@@ -90,7 +90,7 @@ that you spawned in when entering a one-way-portal)
 - need a core and a mantle
 - the core is just crying obsidian
 - the mantle covers every side of the crying obsidian
-- the reactor needs a sacrifice of a stack on activation
+- the reactor needs a sacrifice on activation
 ### overworld reactor
 - mantle: stone
 - sacrifice:
