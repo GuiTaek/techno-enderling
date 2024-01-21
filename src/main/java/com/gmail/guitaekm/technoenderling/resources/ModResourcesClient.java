@@ -6,6 +6,5 @@ import net.fabricmc.api.Environment;
 
 public class ModResourcesClient {
     public static void register() {
-        FogDatapackLoader.register();
     }
 }

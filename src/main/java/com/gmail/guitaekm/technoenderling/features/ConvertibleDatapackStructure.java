@@ -1,5 +1,6 @@
 package com.gmail.guitaekm.technoenderling.features;
 
+import com.gmail.guitaekm.technoenderling.utils.StructureIter;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -132,6 +133,17 @@ public class ConvertibleDatapackStructure {
         return Registry.BLOCK.get(new Identifier(out[0], out[1])) == blockToCheck;
     }
 
+    public boolean checkStructureOnPos(ServerWorld server, BlockPos pos, Vec3i offset) {
+        this.lazyInit(server.getServer());
+        assert this.structure != null;
+        pos = pos.add(offset);
+        ListIterator<List<List<String>>> layerIter = this.structure.listIterator();
+        return StructureIter.iterStructureList(
+                this.structure,
+                pos,
+                (position, value) -> ConvertibleDatapackStructure.checkBlock(server, position, value)
+        ).stream().filter((Boolean res) -> !res).findFirst().isEmpty();
+    }
     /**
      * generates the structure at Position pos
      * @param server the minecraft server
@@ -139,7 +151,7 @@ public class ConvertibleDatapackStructure {
      * @param offset the relative position of the top corner to the center block (remember that this class
      *               assumes symmetry)
      */
-    public boolean checkStructureOnPos(ServerWorld server, BlockPos pos, Vec3i offset) {
+    public boolean checkStructureOnPos2(ServerWorld server, BlockPos pos, Vec3i offset) {
         this.lazyInit(server.getServer());
         assert this.structure != null;
         pos = pos.add(offset);

@@ -9,9 +9,9 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
 public class ModBlocks {
-    public static final Block ENDERWORLD_PORTAL_BLOCK_1 = new EnderworldPortalBlock(FabricBlockSettings.of(Material.METAL).strength(4.0f), 1);
-    public static final Block ENDERWORLD_PORTAL_BLOCK_2 = new EnderworldPortalBlock(FabricBlockSettings.of(Material.METAL).strength(4.0f), 2);
-    public static final Block ENDERWORLD_PORTAL_BLOCK_3 = new EnderworldPortalBlock(FabricBlockSettings.of(Material.METAL).strength(4.0f), 3);
+    public static final Block ENDERWORLD_PORTAL_BLOCK_1 = new EnderworldPortalBlock(FabricBlockSettings.of(Material.METAL).strength(4.0f), 1, false);
+    public static final Block ENDERWORLD_PORTAL_BLOCK_2 = new EnderworldPortalBlock(FabricBlockSettings.of(Material.METAL).strength(4.0f), 2, true);
+    public static final Block ENDERWORLD_PORTAL_BLOCK_3 = new EnderworldPortalBlock(FabricBlockSettings.of(Material.METAL).strength(4.0f), 3, true);
     public static void register() {
         Registry.register(Registry.BLOCK, new Identifier("technoenderling", "enderworld_portal_block_1"), ModBlocks.ENDERWORLD_PORTAL_BLOCK_1);
         Registry.register(Registry.ITEM, new Identifier("technoenderling", "enderworld_portal_block_1"), new BlockItem(ModBlocks.ENDERWORLD_PORTAL_BLOCK_1, new FabricItemSettings()));

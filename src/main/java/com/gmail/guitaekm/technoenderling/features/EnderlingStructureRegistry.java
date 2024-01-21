@@ -52,4 +52,8 @@ public class EnderlingStructureRegistry implements HandleLongUseServer.Listener 
     public void onUse(MinecraftServer server, ServerPlayerEntity player, BlockPos pos) {
         applyStructureTransformation(player.getWorld(), pos);
     }
+
+    public Optional<EnderlingStructure> get(Identifier id) {
+        return this.structures.stream().filter((EnderlingStructure structure) -> structure.id.equals(id)).findFirst();
+    }
 }

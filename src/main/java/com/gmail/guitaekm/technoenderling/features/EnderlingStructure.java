@@ -5,10 +5,13 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Identifier;
+
+import java.util.List;
 
 public class EnderlingStructure {
     protected PlaceableDatapackStructure placeable;
@@ -29,12 +32,11 @@ public class EnderlingStructure {
     public PlaceableDatapackStructure getPlaceable() {
         return this.placeable;
     }
+    public ConvertibleDatapackStructure getConvertible() {
+        return this.convertible;
+    }
 
     public Identifier getId() {
         return this.id;
-    }
-
-    public static boolean isSurfaceBlock(BlockState state) {
-        return state.getBlock() == Blocks.END_STONE;
     }
 }

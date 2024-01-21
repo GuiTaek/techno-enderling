@@ -15,7 +15,7 @@ a human
 ## take entities, players, villagers with you
 - you can enter the portals also while riding an entity like a boat, a minecart or a horse (variant)
 - everything you rode and that rode with you will follow you
-
+- portal tickets propagate through enderworld portal
 # enderworld
 - by design only useful for Techno Enderlings
 - is a new dimension, the origin of the Enderlings

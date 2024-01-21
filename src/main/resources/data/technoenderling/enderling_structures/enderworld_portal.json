@@ -1,0 +1,43 @@
+{
+    "id": "technoenderling:enderworld_portal",
+    "convertible": {
+        "structure": [
+            [
+                [
+                    "minecraft:gold_block"
+                ]
+            ],
+            [
+                [
+                    "minecraft:gold_block"
+                ]
+            ],
+            [
+                [
+                    "minecraft:glowstone"
+                ]
+            ]
+        ],
+        "offsets": [
+            [0,1,0],
+            [0,2,0]
+        ]
+    },
+    "placeable":  [
+        [
+            [
+                "technoenderling:enderworld_portal_block_3"
+            ]
+        ],
+        [
+            [
+                "technoenderling:enderworld_portal_block_2"
+            ]
+        ],
+        [
+            [
+                "technoenderling:enderworld_portal_block_1"
+            ]
+        ]
+    ]
+}
