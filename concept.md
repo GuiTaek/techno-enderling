@@ -15,7 +15,7 @@ a human
 ## take entities, players, villagers with you
 - you can enter the portals also while riding an entity like a boat, a minecart or a horse (variant)
 - everything you rode and that rode with you will follow you
-- portal tickets propagate through enderworld portal
+- tickets except for tickets from enderportals propagate through enderworld portal
 # enderworld
 - by design only useful for Techno Enderlings
 - is a new dimension, the origin of the Enderlings
@@ -52,7 +52,9 @@ that you spawned in when entering a one-way-portal)
 ## portal
 - every player can use it
 - spawn naturally and activated in the overworld but nowhere else
-- is build out of a glowstone block and two gold Blocks above
+- is build out of a glowstone block and two gold Blocks above, however not
+the raw blocks but blocks that have been made useless with amethyst. The glowstone
+blocks drops raw glowstone dust or an amethyst shard
 - right clicking and holding teleports you after some time
 - breaking one block deactivates the portal
 ### enderworld
