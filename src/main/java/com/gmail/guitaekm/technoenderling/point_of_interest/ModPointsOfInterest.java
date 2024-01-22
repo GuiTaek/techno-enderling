@@ -16,12 +16,23 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Predicate;
 
 public class ModPointsOfInterest {
 
     public static PointOfInterestType ENDERWORLD_PORTAL_1;
     public static PointOfInterestType ENDERWORLD_PORTAL_2;
     public static PointOfInterestType ENDERWORLD_PORTAL_3;
+
+    public static final Predicate<PointOfInterestType> IS_ENDERWORLD_PORTAL = (PointOfInterestType poiType) -> {
+        if(poiType.contains(ModBlocks.ENDERWORLD_PORTAL_BLOCK_1.getDefaultState())) {
+            return true;
+        }
+        if(poiType.contains(ModBlocks.ENDERWORLD_PORTAL_BLOCK_2.getDefaultState())) {
+            return true;
+        }
+        return poiType.contains(ModBlocks.ENDERWORLD_PORTAL_BLOCK_3.getDefaultState());
+    };
     public static void registerClass() {
         /*
         ModPointsOfInterest.ENDERWORLD_PORTAL_1 = PointOfInterestHelper.register(

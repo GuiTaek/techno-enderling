@@ -204,7 +204,7 @@ public class EnderworldPortalBlock extends Block implements HandleLongUseServer.
         server.getOverworld().getPointOfInterestStorage().preloadChunks(server.getOverworld(), new BlockPos(0, 64, 0), 256);
 
         Stream<BlockPos> blockStream = pointOfInterestStorage.getInSquare(
-                        PointOfInterestType.ALWAYS_TRUE,
+                        ModPointsOfInterest.IS_ENDERWORLD_PORTAL,
                         pos,
                         this.dimensionScaleInverse,
                         PointOfInterestStorage.OccupationStatus.ANY
