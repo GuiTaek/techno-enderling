@@ -151,42 +151,25 @@ public class EnderworldPortalBlock extends Block implements HandleLongUseServer.
     }
     protected Optional<Vec3d> findTeleportPosToOverworld(MinecraftServer server, PlayerEntity player, Vec3i posOverworld) {
         this.initWithServer(server);
-        // there shouldn't happen an overflow
-        int x = posOverworld.getX();
-        int y = posOverworld.getY();
-        int z = posOverworld.getZ();
-        Set<BlockPos> foundPositions = new HashSet<>();
-        int minY = server.getOverworld().getDimension().getMinimumY();
-        int maxY = server.getOverworld().getDimension().getLogicalHeight() + minY;
-        List<BlockState> relevantStates = this.portal.getPlaceable().getUsedBlocks();
-        for (int currY = minY; currY <= maxY; ++currY) {
-            BlockPos pos = new BlockPos(x, currY, z);
-            // for efficiency first check if there is any relevant block
-            if(relevantStates.contains(server.getOverworld().getBlockState(pos))) {
-                if(this.portal
-                        .getPlaceable()
-                        .checkStructureOnPos(server.getOverworld(), pos)) {
-                    foundPositions.add(pos);
-                }
-            }
-        }
-        final int tempY = y;
-        return foundPositions
-                .stream()
-                .map((BlockPos tempPos)->Math.abs(tempPos.getY() - tempY))
-                .sorted()
-                .findFirst()
-                .map(
-                        (Integer temp2Y) -> EnderworldPortalBlock.findWakeUpPosition(
-                                player.getType(),
-                                server.getOverworld(),
-                                new BlockPos(x, temp2Y + tempY, z),
-                                EnderworldPortalBlock.RESPAWN_OFFSETS,
-                                false
-                        )
-                ).filter(Optional::isPresent)
-                .map(Optional::get);
+        PointOfInterestStorage pointOfInterestStorage = server.getOverworld().getPointOfInterestStorage();
 
+        WorldBorder worldBorder = server.getOverworld().getWorldBorder();
+
+        // scraped and adjusted from net.minecraft.world.PortalForcer.getPortalRect
+        pointOfInterestStorage.preloadChunks(server.getOverworld(), new BlockPos(posOverworld), 1);
+
+        Stream<BlockPos> blockStream = pointOfInterestStorage.getInSquare(
+                        ModPointsOfInterest.IS_ENDERWORLD_PORTAL,
+                        new BlockPos(posOverworld),
+                        this.dimensionScaleInverse,
+                        PointOfInterestStorage.OccupationStatus.ANY
+                )
+                // I will need this when I implement the ticket propagation, therefore I will leave it there until consumed
+                // this.world.getChunkManager().addTicket(ChunkTicketType.PORTAL, new ChunkPos(blockPos), 3, blockPos);
+                .map(PointOfInterest::getPos)
+                .filter(filterPos -> posOverworld.getX() == filterPos.getX())
+                .filter(filterPos -> posOverworld.getZ() == filterPos.getZ());
+        return this.getSpawnPositionFromStream(blockStream, server.getOverworld(), player, worldBorder, posOverworld.getY());
     }
     protected Optional<Vec3d> findTeleportPosToEnderworld(MinecraftServer server, PlayerEntity player, Pair<Vec3i, Vec3i> enderworldRange) {
         this.initWithServer(server);
@@ -201,7 +184,6 @@ public class EnderworldPortalBlock extends Block implements HandleLongUseServer.
 
         // scraped and adjusted from net.minecraft.world.PortalForcer.getPortalRect
         pointOfInterestStorage.preloadChunks(this.enderworld, pos, this.dimensionScaleInverse);
-        server.getOverworld().getPointOfInterestStorage().preloadChunks(server.getOverworld(), new BlockPos(0, 64, 0), 256);
 
         Stream<BlockPos> blockStream = pointOfInterestStorage.getInSquare(
                         ModPointsOfInterest.IS_ENDERWORLD_PORTAL,
