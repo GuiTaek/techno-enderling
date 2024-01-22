@@ -1,30 +1,30 @@
 package com.gmail.guitaekm.technoenderling.blocks;
 
+import com.gmail.guitaekm.technoenderling.TechnoEnderling;
 import com.gmail.guitaekm.technoenderling.features.EnderlingStructure;
 import com.gmail.guitaekm.technoenderling.features.EnderlingStructureRegistry;
 import com.gmail.guitaekm.technoenderling.networking.HandleLongUseServer;
 import com.gmail.guitaekm.technoenderling.point_of_interest.ModPointsOfInterest;
 import com.gmail.guitaekm.technoenderling.utils.DimensionFinder;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
 import net.minecraft.entity.Dismounting;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.Pair;
-import net.minecraft.util.math.*;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.CollisionView;
 import net.minecraft.world.border.WorldBorder;
 import net.minecraft.world.poi.PointOfInterest;
 import net.minecraft.world.poi.PointOfInterestStorage;
-import net.minecraft.world.poi.PointOfInterestType;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
-import java.util.function.Predicate;
+import java.util.Comparator;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public class EnderworldPortalBlock extends Block implements HandleLongUseServer.Listener {
@@ -63,54 +63,61 @@ public class EnderworldPortalBlock extends Block implements HandleLongUseServer.
     };
     final public int index;
     final public boolean active;
+    protected static class LazyInformation {
+        protected DimensionFinder enderworldFinder;
+        protected ServerWorld enderworld;
+        protected int dimensionScaleInverse;
+        protected EnderlingStructure portal;
 
-    protected DimensionFinder enderworldFinder;
-    protected ServerWorld enderworld;
-    protected Integer dimensionScaleInverse;
-    protected EnderlingStructure portal;
+        protected LazyInformation(ServerWorld enderworld, int dimensionScaleInverse, EnderlingStructure portal) {
+            this.enderworld = enderworld;
+            this.dimensionScaleInverse = dimensionScaleInverse;
+            this.portal = portal;
+        }
+    }
+    protected @Nullable LazyInformation info;
+
+    protected LazyInformation getInfo(MinecraftServer server) {
+        if (this.info != null) {
+            return info;
+        }
+        DimensionFinder enderworldFinder = new DimensionFinder(
+                new Identifier(TechnoEnderling.MOD_ID, "enderworld")
+        );
+        enderworldFinder.lazyInit(server);
+        ServerWorld enderworld = server.getWorld(enderworldFinder.get());
+        assert enderworld != null;
+        assert enderworld.getDimension() != null;
+        int dimensionScaleInverse = (int) Math.round(1D / enderworld.getDimension().getCoordinateScale());
+
+        // the reason this is here is, because I want, that the EnderlingStructureRegistry is ready
+        Optional<EnderlingStructure> portalOptional = EnderlingStructureRegistry
+                .instance()
+                .get(new Identifier(TechnoEnderling.MOD_ID, "enderworld_portal"));
+        assert portalOptional.isPresent();
+        EnderlingStructure portal = portalOptional.get();
+        return new LazyInformation(enderworld, dimensionScaleInverse, portal);
+    }
 
     public EnderworldPortalBlock(Settings settings, int index, boolean active) {
         super(settings);
         this.index = index;
         this.active = active;
         HandleLongUseServer.register(this);
-        this.enderworldFinder = new DimensionFinder(new Identifier("technoenderling", "enderworld"));
-        this.dimensionScaleInverse = null;
-        this.portal = null;
-    }
-
-    protected void initWithServer(MinecraftServer server) {
-        this.enderworldFinder.lazyInit(server);
-        this.initEnderworld(server);
-        this.initDimensionScale(server);
-        // the reason this is here is, because I want, that the EnderlingStructureRegistry is ready
-        this.portal = EnderlingStructureRegistry.instance().get(new Identifier("technoenderling", "enderworld_portal")).get();
-    }
-
-    protected void initEnderworld(MinecraftServer server) {
-        this.enderworldFinder.lazyInit(server);
-        if (this.enderworld == null) {
-            this.enderworld = server.getWorld(this.enderworldFinder.get());
-        }
-    }
-
-    protected void initDimensionScale(MinecraftServer server) {
-        this.initEnderworld(server);
-        if (this.dimensionScaleInverse == null) {
-            this.dimensionScaleInverse = (int) Math.round(1D / this.enderworld.getDimension().getCoordinateScale());
-        }
     }
 
     @Override
     public void onUse(MinecraftServer server, ServerPlayerEntity player, BlockPos pos) {
-        this.initWithServer(server);
+        LazyInformation info = this.getInfo(server);
         if(player.getWorld().getBlockState(pos).getBlock() != this) {
+            return;
+        }
+        if(!((EnderworldPortalBlock)player.getWorld().getBlockState(pos).getBlock()).active) {
             return;
         }
         if (player.getWorld().getRegistryKey().getValue().toString().equals("technoenderling:enderworld")) {
             ServerWorld destination = server.getOverworld();
-            Vec3i target = this.enderworldToOverworld(new Vec3i(pos.getX(), pos.getY(), pos.getZ()));
-            Optional<Vec3d> destPosOptional = findTeleportPosToOverworld(server, player, target);
+            Optional<Vec3d> destPosOptional = findTeleportPosToOverworld(server, player, pos);
             if (destPosOptional.isEmpty()) {
                 return;
             }
@@ -119,12 +126,13 @@ public class EnderworldPortalBlock extends Block implements HandleLongUseServer.
             float pitch = player.getPitch();
             player.teleport(destination, destPos.getX(), destPos.getY(), destPos.getZ(), yaw, pitch);
         } else {
-            ServerWorld destination = this.enderworld;
+            ServerWorld destination = info.enderworld;
             Vec3d actualPos = player.getPos();
+            // todo: let the player look at the portal, it shall not be
+            //  easy to get the spawn point of the enderworld
             float yaw = player.getYaw();
             float pitch = player.getPitch();
-            Pair<Vec3i, Vec3i> target = this.overworldToEnderworld(new Vec3i(pos.getX(), pos.getY(), pos.getZ()));
-            Optional<Vec3d> destPosOptional = findTeleportPosToEnderworld(server, player, target);
+            Optional<Vec3d> destPosOptional = findTeleportPosToEnderworld(server, player, pos);
             if (destPosOptional.isEmpty()) {
                 return;
             }
@@ -132,25 +140,13 @@ public class EnderworldPortalBlock extends Block implements HandleLongUseServer.
             player.teleport(destination, destPos.getX(), destPos.getY(), destPos.getZ(), yaw, pitch);
         }
     }
-    protected Vec3i enderworldToOverworld(Vec3i vec) {
-        Vec3d vecExact = new Vec3d(vec.getX() / this.dimensionScaleInverse, vec.getY(), vec.getZ() / this.dimensionScaleInverse);
-        return new Vec3i(Math.floor(vecExact.getX()), Math.floor(vecExact.getY()), Math.floor(vecExact.getZ()));
-    }
-    protected Pair<Vec3i, Vec3i> overworldToEnderworld(Vec3i vec) {
-        Vec3i vecStart = new Vec3i(
-                vec.getX() * this.dimensionScaleInverse,
-                vec.getY(),
-                vec.getZ() * this.dimensionScaleInverse
+    protected Optional<Vec3d> findTeleportPosToOverworld(MinecraftServer server, PlayerEntity player, BlockPos posEnderworld) {
+        LazyInformation info = this.getInfo(server);
+        BlockPos posOverworld = new BlockPos(
+                posEnderworld.getX() / info.dimensionScaleInverse,
+                posEnderworld.getY(),
+                posEnderworld.getZ() / info.dimensionScaleInverse
         );
-        Vec3i vecEnd = new Vec3i(
-                vecStart.getX() + this.dimensionScaleInverse - 1,
-                vec.getY(),
-                vecStart.getZ() + this.dimensionScaleInverse - 1
-        );
-        return new Pair<>(vecStart, vecEnd);
-    }
-    protected Optional<Vec3d> findTeleportPosToOverworld(MinecraftServer server, PlayerEntity player, Vec3i posOverworld) {
-        this.initWithServer(server);
         PointOfInterestStorage pointOfInterestStorage = server.getOverworld().getPointOfInterestStorage();
 
         WorldBorder worldBorder = server.getOverworld().getWorldBorder();
@@ -161,7 +157,7 @@ public class EnderworldPortalBlock extends Block implements HandleLongUseServer.
         Stream<BlockPos> blockStream = pointOfInterestStorage.getInSquare(
                         ModPointsOfInterest.IS_ENDERWORLD_PORTAL,
                         new BlockPos(posOverworld),
-                        this.dimensionScaleInverse,
+                        info.dimensionScaleInverse,
                         PointOfInterestStorage.OccupationStatus.ANY
                 )
                 // I will need this when I implement the ticket propagation, therefore I will leave it there until consumed
@@ -169,45 +165,57 @@ public class EnderworldPortalBlock extends Block implements HandleLongUseServer.
                 .map(PointOfInterest::getPos)
                 .filter(filterPos -> posOverworld.getX() == filterPos.getX())
                 .filter(filterPos -> posOverworld.getZ() == filterPos.getZ());
-        return this.getSpawnPositionFromStream(blockStream, server.getOverworld(), player, worldBorder, posOverworld.getY());
+        return this.getSpawnPositionFromStream(blockStream, server, server.getOverworld(), player, worldBorder, posOverworld.getY());
     }
-    protected Optional<Vec3d> findTeleportPosToEnderworld(MinecraftServer server, PlayerEntity player, Pair<Vec3i, Vec3i> enderworldRange) {
-        this.initWithServer(server);
-        assert enderworldRange.getLeft().getY() == enderworldRange.getRight().getY();
-        PointOfInterestStorage pointOfInterestStorage = this.enderworld.getPointOfInterestStorage();
+    protected Optional<Vec3d> findTeleportPosToEnderworld(MinecraftServer server, PlayerEntity player, BlockPos posOverworld) {
+        LazyInformation info = this.getInfo(server);
+        Vec3i vecStart = new Vec3i(
+                posOverworld.getX() * info.dimensionScaleInverse,
+                posOverworld.getY(),
+                posOverworld.getZ() * info.dimensionScaleInverse
+        );
+        BlockPos posMiddle = new BlockPos(
+                vecStart.getX() + info.dimensionScaleInverse / 2,
+                vecStart.getY(),
+                vecStart.getZ() + info.dimensionScaleInverse / 2
+        );
+        Vec3i vecEnd = new Vec3i(
+                vecStart.getX() + info.dimensionScaleInverse - 1,
+                vecStart.getY(),
+                vecStart.getZ() + info.dimensionScaleInverse - 1
+        );
+        PointOfInterestStorage pointOfInterestStorage = info.enderworld.getPointOfInterestStorage();
 
-        Vec3i doublePos = enderworldRange.getLeft().add(enderworldRange.getRight());
-        Vec3d posDouble = new Vec3d(doublePos.getX(), doublePos.getY(), doublePos.getZ()).multiply(0.5);
-        BlockPos pos = new BlockPos(Math.round(posDouble.getX()), Math.round(posDouble.getY()), Math.round(posDouble.getZ()));
-
-        WorldBorder worldBorder = this.enderworld.getWorldBorder();
+        WorldBorder worldBorder = info.enderworld.getWorldBorder();
 
         // scraped and adjusted from net.minecraft.world.PortalForcer.getPortalRect
-        pointOfInterestStorage.preloadChunks(this.enderworld, pos, this.dimensionScaleInverse);
+        pointOfInterestStorage.preloadChunks(info.enderworld, posMiddle, info.dimensionScaleInverse);
 
         Stream<BlockPos> blockStream = pointOfInterestStorage.getInSquare(
                         ModPointsOfInterest.IS_ENDERWORLD_PORTAL,
-                        pos,
-                        this.dimensionScaleInverse,
+                        posMiddle,
+                        info.dimensionScaleInverse,
                         PointOfInterestStorage.OccupationStatus.ANY
             )
         // I will need this when I implement the ticket propagation, therefore I will leave it there until consumed
         // this.world.getChunkManager().addTicket(ChunkTicketType.PORTAL, new ChunkPos(blockPos), 3, blockPos);
                 .map(PointOfInterest::getPos)
-                .filter(filterPos -> enderworldRange.getLeft().getX() <= filterPos.getX() && filterPos.getX() <= enderworldRange.getRight().getX())
-                .filter(filterPos -> enderworldRange.getLeft().getZ() <= filterPos.getZ() && filterPos.getZ() <= enderworldRange.getRight().getZ());
-        return this.getSpawnPositionFromStream(blockStream, this.enderworld, player, worldBorder, pos.getY());
+                .filter(filterPos -> vecStart.getX() <= filterPos.getX() && filterPos.getX() <= vecEnd.getX())
+                .filter(filterPos -> vecStart.getZ() <= filterPos.getZ() && filterPos.getZ() <= vecEnd.getZ());
+        return this.getSpawnPositionFromStream(blockStream, server, info.enderworld, player, worldBorder, posMiddle.getY());
     }
 
     protected Optional<Vec3d> getSpawnPositionFromStream(
             Stream<BlockPos> stream,
+            MinecraftServer server,
             ServerWorld destination,
             PlayerEntity player,
             WorldBorder worldBorder,
             int yToFind
     ) {
+        LazyInformation info = this.getInfo(server);
         return stream
-                .filter(filterPos -> this.portal
+                .filter(filterPos -> info.portal
                         .getPlaceable()
                         .checkStructureOnPos(destination, filterPos)
                 )
