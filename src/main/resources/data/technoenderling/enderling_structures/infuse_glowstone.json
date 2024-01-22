@@ -1,0 +1,22 @@
+{
+    "id": "technoenderling:gold_to_iron",
+    "convertible": {
+        "structure": [
+            [
+                [
+                    "minecraft:glowstone"
+                ]
+            ]
+        ],
+        "offsets": [
+            [0,0,0]
+        ]
+    },
+    "placeable": [
+        [
+            [
+                "technoenderling:infused_glowstone"
+            ]
+        ]
+    ]
+}

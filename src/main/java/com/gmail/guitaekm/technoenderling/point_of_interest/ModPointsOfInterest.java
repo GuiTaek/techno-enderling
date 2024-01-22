@@ -1,21 +1,11 @@
 package com.gmail.guitaekm.technoenderling.point_of_interest;
 
 import com.gmail.guitaekm.technoenderling.blocks.ModBlocks;
-import com.gmail.guitaekm.technoenderling.mixin.PointOfInterestTypeMixin;
 import net.fabricmc.fabric.api.object.builder.v1.world.poi.PointOfInterestHelper;
-import net.fabricmc.fabric.impl.biome.modification.BuiltInRegistryKeys;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.poi.PointOfInterestType;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Invoker;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.function.Predicate;
 
 public class ModPointsOfInterest {

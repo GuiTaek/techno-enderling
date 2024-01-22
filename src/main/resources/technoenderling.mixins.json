@@ -2,10 +2,7 @@
 	"required": true,
 	"package": "com.gmail.guitaekm.technoenderling.mixin",
 	"compatibilityLevel": "JAVA_17",
-	"mixins": [
-		"BedMixin",
-		"PointOfInterestTypeMixin"
-	],
+	"mixins": [],
 	"injectors": {
 		"defaultRequire": 1
 	}

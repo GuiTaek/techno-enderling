@@ -4,17 +4,17 @@
         "structure": [
             [
                 [
-                    "minecraft:gold_block"
+                    "technoenderling:infused_gold_block"
                 ]
             ],
             [
                 [
-                    "minecraft:gold_block"
+                    "technoenderling:infused_gold_block"
                 ]
             ],
             [
                 [
-                    "minecraft:glowstone"
+                    "technoenderling:infused_glowstone"
                 ]
             ]
         ],
