@@ -133,6 +133,13 @@ public class ConvertibleDatapackStructure {
         return Registry.BLOCK.get(new Identifier(out[0], out[1])) == blockToCheck;
     }
 
+    /**
+     * generates the structure at Position pos
+     * @param server the minecraft server
+     * @param pos the position of the center block
+     * @param offset the relative position of the top corner to the center block (remember that this class
+     *               assumes symmetry)
+     */
     public boolean checkStructureOnPos(ServerWorld server, BlockPos pos, Vec3i offset) {
         this.lazyInit(server.getServer());
         assert this.structure != null;
@@ -143,39 +150,6 @@ public class ConvertibleDatapackStructure {
                 pos,
                 (position, value) -> ConvertibleDatapackStructure.checkBlock(server, position, value)
         ).stream().filter((Boolean res) -> !res).findFirst().isEmpty();
-    }
-    /**
-     * generates the structure at Position pos
-     * @param server the minecraft server
-     * @param pos the position of the center block
-     * @param offset the relative position of the top corner to the center block (remember that this class
-     *               assumes symmetry)
-     */
-    public boolean checkStructureOnPos2(ServerWorld server, BlockPos pos, Vec3i offset) {
-        this.lazyInit(server.getServer());
-        assert this.structure != null;
-        pos = pos.add(offset);
-        ListIterator<List<List<String>>> layerIter = this.structure.listIterator();
-        while(layerIter.hasNext()) {
-            int y = layerIter.nextIndex();
-            List<List<String>> layer = layerIter.next();
-            ListIterator<List<String>> rowIter = layer.listIterator();
-            while(rowIter.hasNext()) {
-                int x = rowIter.nextIndex();
-                List<String> row = rowIter.next();
-                ListIterator<String> colIter = row.listIterator();
-                while(colIter.hasNext()) {
-                    int z = colIter.nextIndex();
-                    String toCheckString = colIter.next();
-                    // remember, from top to bottom, therefore "-y"
-                    BlockPos toCheckPos = pos.add(x, -y, z);
-                    if (!ConvertibleDatapackStructure.checkBlock(server, toCheckPos, toCheckString)) {
-                        return false;
-                    }
-                }
-            }
-        }
-        return true;
     }
     public Vec3i size() {
         int y = this.structure.size();
