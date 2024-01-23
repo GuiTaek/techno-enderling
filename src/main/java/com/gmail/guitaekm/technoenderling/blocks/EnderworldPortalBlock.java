@@ -8,6 +8,7 @@ import com.gmail.guitaekm.technoenderling.point_of_interest.ModPointsOfInterest;
 import com.gmail.guitaekm.technoenderling.utils.DimensionFinder;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Dismounting;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
@@ -15,6 +16,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.CollisionView;
@@ -23,8 +25,11 @@ import net.minecraft.world.poi.PointOfInterest;
 import net.minecraft.world.poi.PointOfInterestStorage;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 public class EnderworldPortalBlock extends Block implements HandleLongUseServer.Listener {
@@ -61,10 +66,61 @@ public class EnderworldPortalBlock extends Block implements HandleLongUseServer.
             {0, 1, 0}
 
     };
+
+    public static final int[][] VEHICLE_RESPAWN_OFFSET = {
+            { 2, -1, -1},
+            { 2, -1,  0},
+            { 2, -1,  1},
+
+            { 1, -1,  2},
+            { 0, -1,  2},
+            {-1, -1,  2},
+
+            {-2, -1,  1},
+            {-2, -1,  0},
+            {-2, -1, -1},
+
+            {-1, -1, -2},
+            { 0, -1, -2},
+            { 1, -1,  2},
+
+
+            { 2,  0, -1},
+            { 2,  0,  0},
+            { 2,  0,  1},
+
+            { 1,  0,  2},
+            { 0,  0,  2},
+            {-1,  0,  2},
+
+            {-2,  0,  1},
+            {-2,  0,  0},
+            {-2,  0, -1},
+
+            {-1,  0, -2},
+            { 0,  0, -2},
+            { 1,  0,  2},
+
+
+            { 2, -3, -1},
+            { 2, -3,  0},
+            { 2, -3,  1},
+
+            { 1, -3,  2},
+            { 0, -3,  2},
+            {-1, -3,  2},
+
+            {-2, -3,  1},
+            {-2, -3,  0},
+            {-2, -3, -1},
+
+            {-1, -3, -2},
+            { 0, -3, -2},
+            { 1, -3,  2}
+    };
     final public int index;
     final public boolean active;
     protected static class LazyInformation {
-        protected DimensionFinder enderworldFinder;
         protected ServerWorld enderworld;
         protected int dimensionScaleInverse;
         protected EnderlingStructure portal;
@@ -117,30 +173,140 @@ public class EnderworldPortalBlock extends Block implements HandleLongUseServer.
         }
         if (player.getWorld().getRegistryKey().getValue().toString().equals("technoenderling:enderworld")) {
             ServerWorld destination = server.getOverworld();
-            Optional<Vec3d> destPosOptional = findTeleportPosToOverworld(server, player, pos);
-            if (destPosOptional.isEmpty()) {
-                return;
-            }
-            Vec3d destPos = destPosOptional.get();
-            float yaw = player.getYaw();
-            float pitch = player.getPitch();
-            player.teleport(destination, destPos.getX(), destPos.getY(), destPos.getZ(), yaw, pitch);
+            List<BlockPos> portalStream = this.findPortalPosToOverworld(server, pos).toList();
+            this.teleportWithTargetPortalPositions(server, destination, player, portalStream, pos);
         } else {
             ServerWorld destination = info.enderworld;
-            Vec3d actualPos = player.getPos();
-            // todo: let the player look at the portal, it shall not be
-            //  easy to get the spawn point of the enderworld
-            float yaw = player.getYaw();
-            float pitch = player.getPitch();
-            Optional<Vec3d> destPosOptional = findTeleportPosToEnderworld(server, player, pos);
-            if (destPosOptional.isEmpty()) {
-                return;
-            }
-            Vec3d destPos = destPosOptional.get();
-            player.teleport(destination, destPos.getX(), destPos.getY(), destPos.getZ(), yaw, pitch);
+            List<BlockPos> portalStream = this.findPortalPosToEnderworld(server, pos).toList();
+            this.teleportWithTargetPortalPositions(server, destination, player, portalStream, pos);
+
         }
     }
-    protected Optional<Vec3d> findTeleportPosToOverworld(MinecraftServer server, PlayerEntity player, BlockPos posEnderworld) {
+
+    protected void teleportWithTargetPortalPositions(
+            MinecraftServer server,
+            ServerWorld destination,
+            ServerPlayerEntity player,
+            List<BlockPos> portalPositions,
+            BlockPos oldPortalPos
+    ) {
+        int[][] offsets = player.hasVehicle() ? EnderworldPortalBlock.VEHICLE_RESPAWN_OFFSET : EnderworldPortalBlock.RESPAWN_OFFSETS;
+        Optional<BlockPos> chosenPortal = this.getValidPortal(
+            portalPositions,
+            server,
+            destination,
+            player,
+            oldPortalPos.getY(),
+            offsets
+        );
+        if (chosenPortal.isEmpty()) {
+            return;
+        }
+        Optional<Vec3d> destPosOptional = EnderworldPortalBlock.findWakeUpPosition(
+                player.getRootVehicle().getType(),
+                destination,
+                chosenPortal.get(),
+                offsets,
+                false
+        );
+        // as this was checked inside getSpawnPositionFromStream, this should never happen
+        assert destPosOptional.isPresent();
+        Vec3d destPos = destPosOptional.get();
+        EnderworldPortalBlock.teleportWithVehicle(player, destination, chosenPortal.get(), destPos.getX(), destPos.getY(), destPos.getZ());
+    }
+
+    static class VehicleRecursionStructure {
+        List<VehicleRecursionStructure> riders;
+        Entity vertex;
+
+        protected VehicleRecursionStructure(Entity vertex, VehicleRecursionStructure... riders) {
+            this.riders = Arrays.stream(riders).toList();
+            this.vertex = vertex;
+        }
+
+        protected static VehicleRecursionStructure parseVehicle(
+                Entity rootVehicle,
+                Consumer<Entity> consumeEntityInTree
+        ) {
+            return new VehicleRecursionStructure(rootVehicle, rootVehicle.getPassengerList().stream().map(
+                (Entity childEntity) -> {
+                    consumeEntityInTree.accept(childEntity);
+                    return VehicleRecursionStructure.parseVehicle(childEntity, consumeEntityInTree);
+                }
+                ).toArray(VehicleRecursionStructure[]::new)
+            );
+        }
+    }
+
+    protected static void teleportWithVehicle(ServerPlayerEntity player, ServerWorld targetWorld, BlockPos portalPos, double x, double y, double z) {
+        if(player.hasVehicle()) {
+            Entity rootEntity = player.getRootVehicle();
+            VehicleRecursionStructure.parseVehicle(player.getRootVehicle(), new Consumer<Entity>() {
+                @Override
+                public void accept(Entity entity) {
+                    entity.dismountVehicle();
+                    EnderworldPortalBlock.teleportUnmountedEntity(entity, targetWorld, portalPos, x, y, z);
+                }
+            });
+            EnderworldPortalBlock.teleportUnmountedEntity(rootEntity, targetWorld, portalPos, x, y, z);
+            return;
+        }
+        EnderworldPortalBlock.teleportUnmountedEntity(player, targetWorld, portalPos, x, y, z);
+    }
+
+    // scraped unchanged from MoveControl
+    public static float wrapDegrees(float from, float to, float max) {
+        float g;
+        float f = MathHelper.wrapDegrees(to - from);
+        if (f > max) {
+            f = max;
+        }
+        if (f < -max) {
+            f = -max;
+        }
+        if ((g = from + f) < 0.0f) {
+            g += 360.0f;
+        } else if (g > 360.0f) {
+            g -= 360.0f;
+        }
+        return g;
+    }
+    protected static float getYawDirection(double x, double z, BlockPos portalPos) {
+        // scraped and modifed from DrownedEntity.tick
+        // weirdly enough this isn't part of a method in a central place
+        int dx = (int) (portalPos.getX() - Math.floor(x));
+        int dz = (int) (portalPos.getZ() - Math.floor(z));
+        // by the way, the magic number 57.29... is just 180/pi and it actually makes sense to
+        // have it hard coded I guess for performance
+        float angle = (float)(MathHelper.atan2(dz, dx) * 57.2957763671875) - 90;
+        return angle;
+    }
+    protected static void teleportUnmountedEntity(Entity entity, ServerWorld targetWorld, BlockPos portalPos, double x, double y, double z) {
+
+        if (entity instanceof ServerPlayerEntity player) {
+            player.teleport(targetWorld, x, y, z, EnderworldPortalBlock.getYawDirection(x, z, portalPos), 0);
+            return;
+        }
+        // scraped from the needed part of net.minecraft.server.command.TeleportCommand.teleport
+        // again, I don't want to change this part, I just want to use it
+        Entity oldEntity = entity;
+        oldEntity.detach();
+        entity = entity.getType().create(targetWorld);
+        if (entity == null) {
+            return;
+        }
+
+        entity.copyFrom(oldEntity);
+        entity.refreshPositionAndAngles(x, y, z, entity.getYaw(), entity.getPitch());
+        entity.setHeadYaw(entity.getHeadYaw());
+        oldEntity.setRemoved(Entity.RemovalReason.CHANGED_DIMENSION);
+        targetWorld.onDimensionChanged(entity);
+
+        entity.setYaw(EnderworldPortalBlock.getYawDirection(x, z, portalPos));
+        entity.setBodyYaw(entity.getYaw());
+        entity.setPitch(0);
+    }
+    protected Stream<BlockPos> findPortalPosToOverworld(MinecraftServer server, BlockPos posEnderworld) {
         LazyInformation info = this.getInfo(server);
         BlockPos posOverworld = new BlockPos(
                 posEnderworld.getX() / info.dimensionScaleInverse,
@@ -149,12 +315,10 @@ public class EnderworldPortalBlock extends Block implements HandleLongUseServer.
         );
         PointOfInterestStorage pointOfInterestStorage = server.getOverworld().getPointOfInterestStorage();
 
-        WorldBorder worldBorder = server.getOverworld().getWorldBorder();
-
         // scraped and adjusted from net.minecraft.world.PortalForcer.getPortalRect
         pointOfInterestStorage.preloadChunks(server.getOverworld(), new BlockPos(posOverworld), 1);
 
-        Stream<BlockPos> blockStream = pointOfInterestStorage.getInSquare(
+        return pointOfInterestStorage.getInSquare(
                         ModPointsOfInterest.IS_ENDERWORLD_PORTAL,
                         new BlockPos(posOverworld),
                         info.dimensionScaleInverse,
@@ -165,9 +329,8 @@ public class EnderworldPortalBlock extends Block implements HandleLongUseServer.
                 .map(PointOfInterest::getPos)
                 .filter(filterPos -> posOverworld.getX() == filterPos.getX())
                 .filter(filterPos -> posOverworld.getZ() == filterPos.getZ());
-        return this.getSpawnPositionFromStream(blockStream, server, server.getOverworld(), player, worldBorder, posOverworld.getY());
     }
-    protected Optional<Vec3d> findTeleportPosToEnderworld(MinecraftServer server, PlayerEntity player, BlockPos posOverworld) {
+    protected Stream<BlockPos> findPortalPosToEnderworld(MinecraftServer server, BlockPos posOverworld) {
         LazyInformation info = this.getInfo(server);
         Vec3i vecStart = new Vec3i(
                 posOverworld.getX() * info.dimensionScaleInverse,
@@ -186,12 +349,10 @@ public class EnderworldPortalBlock extends Block implements HandleLongUseServer.
         );
         PointOfInterestStorage pointOfInterestStorage = info.enderworld.getPointOfInterestStorage();
 
-        WorldBorder worldBorder = info.enderworld.getWorldBorder();
-
         // scraped and adjusted from net.minecraft.world.PortalForcer.getPortalRect
         pointOfInterestStorage.preloadChunks(info.enderworld, posMiddle, info.dimensionScaleInverse);
 
-        Stream<BlockPos> blockStream = pointOfInterestStorage.getInSquare(
+        return pointOfInterestStorage.getInSquare(
                         ModPointsOfInterest.IS_ENDERWORLD_PORTAL,
                         posMiddle,
                         info.dimensionScaleInverse,
@@ -202,19 +363,20 @@ public class EnderworldPortalBlock extends Block implements HandleLongUseServer.
                 .map(PointOfInterest::getPos)
                 .filter(filterPos -> vecStart.getX() <= filterPos.getX() && filterPos.getX() <= vecEnd.getX())
                 .filter(filterPos -> vecStart.getZ() <= filterPos.getZ() && filterPos.getZ() <= vecEnd.getZ());
-        return this.getSpawnPositionFromStream(blockStream, server, info.enderworld, player, worldBorder, posMiddle.getY());
     }
 
-    protected Optional<Vec3d> getSpawnPositionFromStream(
-            Stream<BlockPos> stream,
+    protected Optional<BlockPos> getValidPortal(
+            List<BlockPos> possiblePortals,
             MinecraftServer server,
             ServerWorld destination,
             PlayerEntity player,
-            WorldBorder worldBorder,
-            int yToFind
+            int yToFind,
+            int[][] offsets
     ) {
         LazyInformation info = this.getInfo(server);
-        return stream
+        Entity entity = player.getRootVehicle();
+        WorldBorder worldBorder = destination.getWorldBorder();
+        return possiblePortals.stream()
                 .filter(filterPos -> info.portal
                         .getPlaceable()
                         .checkStructureOnPos(destination, filterPos)
@@ -228,16 +390,14 @@ public class EnderworldPortalBlock extends Block implements HandleLongUseServer.
                     public int compare(BlockPos left, BlockPos right) {
                         return mappedValue(left).compareTo(mappedValue(right));
                     }
-                })
-                .map((BlockPos filterPortalBlockedPos) -> EnderworldPortalBlock.findWakeUpPosition(
-                        player.getType(),
+                }).filter((BlockPos filterPortalBlockedPos) -> EnderworldPortalBlock.findWakeUpPosition(
+                        entity.getType(),
                         destination,
                         filterPortalBlockedPos,
-                        EnderworldPortalBlock.RESPAWN_OFFSETS,
+                        offsets,
                         false
-                )).findFirst()
-                .filter(Optional::isPresent)
-                .map(Optional::get);
+                ).isPresent())
+                .findFirst();
 
     }
     // scraped from net.minecraft.block.BedBlock, as I need changes that aren't in the BedBlock
