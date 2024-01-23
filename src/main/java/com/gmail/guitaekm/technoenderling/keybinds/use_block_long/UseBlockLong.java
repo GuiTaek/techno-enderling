@@ -150,7 +150,7 @@ public class UseBlockLong {
             return;
         }
         for(ListenerInstance listener : UseBlockLong.iterateOverCallbacks()) {
-            listener.callback.onEndUse(client, client.world, client.player, UseBlockLong.getTargetBlockPos(client).get(), current.age);
+            listener.callback.onEndUse(client, client.world, client.player, UseBlockLong.current.pos, current.age);
             listener.dead = true;
         }
     }
