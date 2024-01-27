@@ -30,7 +30,13 @@ public class VehicleTeleport {
             treeTraverser.depthFirstSearch((parent, child) -> child.startRiding(parent));
             return;
         }
-        teleportUnmountedEntity(player, targetWorld, portalPos, x, y, z);
+        // tps with /tp of boats with players inside boats are completely ignored, players gets dismounted on tps
+        // this all happens on client leading to desync randomly and unpredictable
+        // having this line is more convenient, unfortuntely, you would get teleported far away from your
+        // portal I tried tinkering this, nothing what I tried worked consistantly
+        // thinking of custom vehicles like e.g. create I think we're all better not supporting staying in the
+        // vehicle on teleport
+        //treeTraverser.depthFirstSearch((parent, child) -> child.startRiding(parent, true));
     }
 
     public static float getYawDirection(double x, double z, BlockPos portalPos) {
