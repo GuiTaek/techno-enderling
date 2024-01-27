@@ -7,6 +7,7 @@ import com.gmail.guitaekm.technoenderling.utils.DimensionFinder;
 import com.google.common.collect.Sets;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -68,8 +69,7 @@ public class LinkEnderworldPortals implements OnStructureActivate.Listener {
      * @param root the root position of the other portal
      */
     public static void buildPlatformAndClearRoom(ServerWorld world, ServerPlayerEntity player, BlockPos root) {
-        // todo clear the room
-        // todo check if creative
+        LinkEnderworldPortals.clearRoom(world, root);
         List<ItemStack> platformStacks = new ArrayList<>();
         Set<Item> possiblePlatformItems = Sets.newHashSet(
                 Items.END_STONE,
@@ -93,16 +93,21 @@ public class LinkEnderworldPortals implements OnStructureActivate.Listener {
             )) {
                 continue;
             }
-            if (platformStacks.isEmpty()) {
-                break;
-            }
-            BlockState state = ((BlockItem)platformStacks.get(0).split(1).getItem())
-                    .getBlock()
-                    .getDefaultState();
-            if (platformStacks.get(0).getCount() == 0) {
-                platformStacks.remove(0);
-            }
             Block.dropStacks(world.getBlockState(pos), world, pos);
+            BlockState state;
+            if (player.isCreative()) {
+                state = Blocks.END_STONE.getDefaultState();
+            } else {
+                if (platformStacks.isEmpty()) {
+                    break;
+                }
+                state = ((BlockItem)platformStacks.get(0).split(1).getItem())
+                        .getBlock()
+                        .getDefaultState();
+                if (platformStacks.get(0).getCount() == 0) {
+                    platformStacks.remove(0);
+                }
+            }
             world.setBlockState(pos, state, Block.NOTIFY_ALL);
         }
     }
@@ -114,6 +119,9 @@ public class LinkEnderworldPortals implements OnStructureActivate.Listener {
      * @return true, if the items are taken
      */
     public static boolean tryTakePortalItems(ServerPlayerEntity player) {
+        if (player.isCreative()) {
+            return true;
+        }
         // I don't think you can anyhow make it usable in data packs, has to be hard coded
         // better would be a config though
         List<ItemStack> goldStacks = new ArrayList<>();
@@ -178,5 +186,44 @@ public class LinkEnderworldPortals implements OnStructureActivate.Listener {
             result.addAll(toShuffledRing);
         }
         return result;
+    }
+
+    public static void clearRoom(ServerWorld world, BlockPos pos) {
+        /*
+        // configure
+        for (int x = -3; x <= 3; x++) {
+            int y = 2;
+            for (int z = -3; z <= 3; z++) {
+                if (world.getBlockState(pos).isSideSolidFullSquare(
+                        world,
+                        pos,
+                        Direction.UP
+                )) {
+                    continue;
+                }
+                BlockPos toBreak = pos.add(x, y, z);
+                Block.dropStacks(world.getBlockState(pos), world, toBreak);
+                world.setBlockState(
+                        toBreak,
+                        Blocks.AIR.getDefaultState(),
+                        Block.NOTIFY_LISTENERS | Block.FORCE_STATE
+                );
+            }
+        }
+        */
+        // configure
+        for (int x = -3; x <= 3; x++) {
+            for (int y = -1; y <= 1; y++) {
+                for (int z = -3; z <= 3; z++) {
+                    BlockPos toBreak = pos.add(x, y, z);
+                    Block.dropStacks(world.getBlockState(pos), world, toBreak);
+                    world.setBlockState(
+                            toBreak,
+                            Blocks.AIR.getDefaultState(),
+                            Block.NOTIFY_LISTENERS | Block.FORCE_STATE
+                    );
+                }
+            }
+        }
     }
 }
