@@ -2,13 +2,11 @@ package com.gmail.guitaekm.technoenderling.utils;
 
 import com.gmail.guitaekm.technoenderling.blocks.TreeTraverser;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.SpawnRestriction;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.CollisionView;
+import net.minecraft.util.math.*;
+import net.minecraft.world.SpawnHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,20 +14,27 @@ import java.util.Optional;
 import java.util.Stack;
 
 public class VehicleTeleport {
-    public static void teleportWithVehicle(ServerPlayerEntity player, ServerWorld targetWorld, BlockPos portalPos, double x, double y, double z) {
-        if(player.hasVehicle()) {
-            TreeTraverser<Entity> treeTraverser = TreeTraverser.parseVertex(
-                    player.getRootVehicle(),
-                    Entity::getPassengerList,
-                    entity -> {
-                        if(entity.hasVehicle()) {
-                            entity.dismountVehicle();
-                        }
-                        return teleportUnmountedEntity(entity, targetWorld, portalPos, x, y, z);
-                    });
-            treeTraverser.depthFirstSearch((parent, child) -> child.startRiding(parent));
-            return;
-        }
+    protected static int[][] VEHICLE_SPAWN_CHECK_OFFSET = {
+            {0, 0, 0},
+            {0, 0, 1},
+            {1, 0, 1},
+            {1, 0, 0},
+            {1, 0, -1},
+            {0, 0, -1},
+            {-1, 0, -1},
+            {-1, 0, 0},
+            {-1, 0, 1}
+    };
+    public static void teleportWithVehicle(TeleportParams params) {
+        TreeTraverser<Entity> treeTraverser = TreeTraverser.parseVertex(
+                params.player.getRootVehicle(),
+                Entity::getPassengerList,
+                entity -> {
+                    if(entity.hasVehicle()) {
+                        entity.dismountVehicle();
+                    }
+                    return teleportUnmountedEntity(entity, params.targetWorld, params.portalPos, params.x, params.y, params.z);
+                });
         // tps with /tp of boats with players inside boats are completely ignored, players gets dismounted on tps
         // this all happens on client leading to desync randomly and unpredictable
         // having this line is more convenient, unfortuntely, you would get teleported far away from your
@@ -86,29 +91,29 @@ public class VehicleTeleport {
     }
 
     // scraped from net.minecraft.block.BedBlock, as I need changes that aren't in the BedBlock
-    public static Optional<Vec3d> findWakeUpPosition(ServerPlayerEntity player, CollisionView world, BlockPos pos, int[][] possibleOffsets, boolean ignoreInvalidPos) {
-        Vec3d toCheck;
+    public static Optional<Vec3d> findWakeUpPosition(ServerPlayerEntity player, ServerWorld world, BlockPos pos, int[][] possibleOffsets, boolean ignoreInvalidPos) {
+        BlockPos toCheck;
         for (int[] is : possibleOffsets) {
-            toCheck = new Vec3d(pos.getX() + is[0] + 0.5, pos.getY() + is[1], pos.getZ() + is[2] + 0.5);
-            if (!enoughSpaceForEntities(world, getRidingStack(player), toCheck)) {
-                continue;
-            }
-            return Optional.of(toCheck);
+            toCheck = new BlockPos(pos.getX() + is[0], pos.getY() + is[1], pos.getZ() + is[2]);
+            if (player.hasVehicle() && !VehicleTeleport.canVehicleSpawn(world, toCheck)) continue;
+            if (!canSpawnAllEntities(world, getRidingStack(player), toCheck)) continue;
+            Vec3d result = new Vec3d(toCheck.getX() + 0.5, toCheck.getY(), toCheck.getZ() + 0.5);
+            return Optional.of(result);
         }
         return Optional.empty();
     }
 
-    public static boolean enoughSpaceForEntities(CollisionView world, List<Entity> entities, Vec3d pos) {
+    public static boolean canSpawnAllEntities(ServerWorld world, List<Entity> entities, BlockPos pos) {
         for (Entity entity : entities) {
-            Vec3d feet = entity
-                    .getBoundingBox()
-                    .getCenter()
-                    .subtract(0, entity.getBoundingBox().getYLength() / 2, 0);
-            Box boxAtPos = entity
-                    .getBoundingBox()
-                    .offset(feet.multiply(-1))
-                    .offset(pos);
-            if (!world.isSpaceEmpty(boxAtPos)) {
+            if (!SpawnHelper.canSpawn(SpawnRestriction.Location.ON_GROUND, world, pos, entity.getType())) {
+                return false;
+            }
+        }
+        return true;
+    }
+    public static boolean canVehicleSpawn(ServerWorld world, BlockPos pos) {
+        for (int[] offset : VehicleTeleport.VEHICLE_SPAWN_CHECK_OFFSET) {
+            if(!world.getBlockState(pos.add(offset[0], offset[1], offset[2])).getCollisionShape(world, pos).isEmpty()) {
                 return false;
             }
         }

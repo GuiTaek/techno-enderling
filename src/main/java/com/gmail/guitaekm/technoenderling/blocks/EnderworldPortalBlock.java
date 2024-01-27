@@ -6,13 +6,16 @@ import com.gmail.guitaekm.technoenderling.features.EnderlingStructureRegistry;
 import com.gmail.guitaekm.technoenderling.networking.HandleLongUseServer;
 import com.gmail.guitaekm.technoenderling.point_of_interest.ModPointsOfInterest;
 import com.gmail.guitaekm.technoenderling.utils.DimensionFinder;
+import com.gmail.guitaekm.technoenderling.utils.TeleportParams;
 import com.gmail.guitaekm.technoenderling.utils.VehicleTeleport;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.*;
+import net.minecraft.world.WorldAccess;
 import net.minecraft.world.border.WorldBorder;
 import net.minecraft.world.poi.PointOfInterest;
 import net.minecraft.world.poi.PointOfInterestStorage;
@@ -22,6 +25,7 @@ import java.util.*;
 import java.util.stream.Stream;
 
 public class EnderworldPortalBlock extends Block implements HandleLongUseServer.Listener {
+    // configure
     public static final int[][] RESPAWN_OFFSETS = new int[][] {
             {1, -1, 0},
             {0, -1, 1},
@@ -56,6 +60,7 @@ public class EnderworldPortalBlock extends Block implements HandleLongUseServer.
 
     };
 
+    // configure
     public static final int[][] VEHICLE_RESPAWN_OFFSET = {
             { 2, -1, -1},
             { 2, -1,  0},
@@ -105,10 +110,13 @@ public class EnderworldPortalBlock extends Block implements HandleLongUseServer.
 
             {-1, -2, -2},
             { 0, -2, -2},
-            { 1, -2,  2}
+            { 1, -2,  2},
+
+            {0, 1, 0}
     };
     final public int index;
     final public boolean active;
+    final public Block unactiveCounterpart;
     protected static class LazyInformation {
         protected ServerWorld enderworld;
         protected int dimensionScaleInverse;
@@ -144,10 +152,11 @@ public class EnderworldPortalBlock extends Block implements HandleLongUseServer.
         return new LazyInformation(enderworld, dimensionScaleInverse, portal);
     }
 
-    public EnderworldPortalBlock(Settings settings, int index, boolean active) {
+    public EnderworldPortalBlock(Settings settings, int index, boolean active, Block unactiveCounterpart) {
         super(settings);
         this.index = index;
         this.active = active;
+        this.unactiveCounterpart = unactiveCounterpart;
         HandleLongUseServer.register(this);
     }
 
@@ -201,7 +210,14 @@ public class EnderworldPortalBlock extends Block implements HandleLongUseServer.
         // as this was checked inside getSpawnPositionFromStream, this should never happen
         assert destPosOptional.isPresent();
         Vec3d destPos = destPosOptional.get();
-        VehicleTeleport.teleportWithVehicle(player, destination, chosenPortal.get(), destPos.getX(), destPos.getY(), destPos.getZ());
+        VehicleTeleport.teleportWithVehicle(new TeleportParams(
+                player,
+                destination,
+                chosenPortal.get(),
+                destPos.getX(),
+                destPos.getY(),
+                destPos.getZ()
+        ));
     }
 
     protected Stream<BlockPos> findPortalPosToOverworld(MinecraftServer server, BlockPos posEnderworld) {
@@ -273,10 +289,13 @@ public class EnderworldPortalBlock extends Block implements HandleLongUseServer.
     ) {
         LazyInformation info = this.getInfo(server);
         WorldBorder worldBorder = destination.getWorldBorder();
+        info.portal.getConvertible().lazyInit(server);
+        List<Vec3i> convertibleOffsets = info.portal.getConvertible().getOffsets();
+        assert convertibleOffsets != null;
         return possiblePortals.stream()
                 .filter(filterPos -> info.portal
                         .getPlaceable()
-                        .checkStructureOnPos(destination, filterPos)
+                        .checkStructureOnPos(destination, filterPos, convertibleOffsets).isPresent()
                 )
                 .filter(worldBorder::contains)
                 .sorted(new Comparator<BlockPos>() {
@@ -298,4 +317,20 @@ public class EnderworldPortalBlock extends Block implements HandleLongUseServer.
 
     }
 
+    @Override
+    public BlockState getStateForNeighborUpdate(BlockState state, Direction direction, BlockState neighborState, WorldAccess world, BlockPos pos, BlockPos neighborPos) {
+        if (world.isClient()) {
+            return super.getStateForNeighborUpdate(state, direction, neighborState, world, pos, neighborPos);
+        }
+        LazyInformation info = this.getInfo(world.getServer());
+        if (info.portal.getPlaceable().checkStructureOnPos(
+                (ServerWorld) world,
+                pos,
+                info.portal.getPlaceable().getAllAvailableOffsets()
+                ).isEmpty()
+        ) {
+            return this.unactiveCounterpart.getDefaultState();
+        }
+        return super.getStateForNeighborUpdate(state, direction, neighborState, world, pos, neighborPos);
+    }
 }

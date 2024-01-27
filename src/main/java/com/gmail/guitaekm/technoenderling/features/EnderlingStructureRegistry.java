@@ -1,5 +1,6 @@
 package com.gmail.guitaekm.technoenderling.features;
 
+import com.gmail.guitaekm.technoenderling.event.OnStructureActivate;
 import com.gmail.guitaekm.technoenderling.networking.HandleLongUseServer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -37,20 +38,25 @@ public class EnderlingStructureRegistry implements HandleLongUseServer.Listener 
         ).toList();
     }
 
-    public void applyStructureTransformation(ServerWorld world, BlockPos pos) {
+    public void applyStructureTransformation(ServerPlayerEntity player, ServerWorld world, BlockPos pos) {
         // shuffle makes the applied transformation non-deterministic, if multiple possibilities
         Collections.shuffle(this.structures, world.getRandom());
         this.structures.forEach(
                 (EnderlingStructure structure) -> {
                     Optional<BlockPos> toPlacePos = structure.convertible.findStructureToConvert(world, pos);
-                    toPlacePos.ifPresent(blockPos -> structure.placeable.generate(world, blockPos));
+                    toPlacePos.ifPresent(blockPos -> {
+
+                        if (OnStructureActivate.getInstance().callListeners(player, world, structure, blockPos)) {
+                            structure.placeable.generate(world, blockPos);
+                        }
+                    });
                 }
         );
     }
 
     @Override
     public void onUse(MinecraftServer server, ServerPlayerEntity player, BlockPos pos) {
-        applyStructureTransformation(player.getWorld(), pos);
+        applyStructureTransformation(player, player.getWorld(), pos);
     }
 
     public Optional<EnderlingStructure> get(Identifier id) {

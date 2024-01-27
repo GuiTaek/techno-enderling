@@ -4,11 +4,10 @@ import com.gmail.guitaekm.technoenderling.utils.StructureIter;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.block.Block;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.tag.Tag;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3i;
@@ -43,7 +42,7 @@ public class ConvertibleDatapackStructure {
         this.size = null;
     }
 
-    protected void lazyInit(MinecraftServer server) {
+    public void lazyInit(MinecraftServer server) {
         if (!this.isReady) {
             this.size = ConvertibleDatapackStructure.parseSize(this.structureJson);
             this.offsets = ConvertibleDatapackStructure.parseOffsets(this.size, this.offsetsJson);
@@ -109,28 +108,43 @@ public class ConvertibleDatapackStructure {
         }
         Registry.BLOCK.get(new Identifier(out[0], out[1]));
     }
-    protected static boolean checkBlock(ServerWorld server, BlockPos pos, String toCheck) {
-        // empty strings won't replace existing Blocks
-        toCheck = toCheck.strip();
-        if (toCheck.isEmpty()) {
-            return true;
+    protected static <R> R doIfBlockElse(
+            ServerWorld world,
+            BlockPos pos,
+            String value,
+            StructureIter.IterCallback<Block, R> ifBlock,
+            StructureIter.IterCallback<Tag<Block>, R> ifTag,
+            StructureIter.IterCallback<Void, R> ifEmpty
+    ) {
+        value = value.strip();
+        if (value.isEmpty()) {
+            return ifEmpty.map(pos, null);
         }
-        String[] out = toCheck.split(":");
+        String[] out = value.split(":");
         if (out.length != 2) {
             throw new IllegalArgumentException("Expects for the blocks two names, separated by a colon");
         }
-        Block blockToCheck = server.getBlockState(pos).getBlock();
         if (out[0].charAt(0) == '#') {
-            return server
+            return ifTag.map(pos, world
                     .getTagManager()
                     .getTag(
-                        Registry.BLOCK_KEY,
-                        new Identifier(out[0].substring(1), out[1]),
-                        id -> new NoTagKnownException(id.toString())
-                    )
-                    .contains(blockToCheck);
+                            Registry.BLOCK_KEY,
+                            new Identifier(out[0].substring(1), out[1]),
+                            id -> new NoTagKnownException(id.toString())
+                    ));
         }
-        return Registry.BLOCK.get(new Identifier(out[0], out[1])) == blockToCheck;
+        return ifBlock.map(pos, Registry.BLOCK.get(new Identifier(out[0], out[1])));
+    }
+    protected static boolean checkBlock(ServerWorld server, BlockPos pos, String toCheck) {
+        // empty strings won't replace existing Blocks
+        return ConvertibleDatapackStructure.doIfBlockElse(
+                server,
+                pos,
+                toCheck,
+                (toCheckPos, block) -> server.getBlockState(toCheckPos).getBlock() == block,
+                (position, tag) -> tag.contains(server.getBlockState(position).getBlock()),
+                (position, value) -> true
+        );
     }
 
     /**
@@ -157,6 +171,9 @@ public class ConvertibleDatapackStructure {
         int z = this.structure.get(0).get(0).size();
         return new Vec3i(x, y, z);
     }
+    public @Nullable List<Vec3i> getOffsets() {
+        return this.offsets;
+    }
     public Optional<BlockPos> findStructureToConvert(ServerWorld server, BlockPos pos) {
         this.lazyInit(server.getServer());
         assert this.offsets != null;
@@ -171,5 +188,30 @@ public class ConvertibleDatapackStructure {
             }
         }
         return Optional.empty();
+    }
+    public void undoConversion(ServerWorld world, BlockPos pos, int flags) {
+        this.lazyInit(world.getServer());
+        assert this.structure != null;
+        StructureIter.iterStructureList(
+                this.structure,
+                pos,
+                (position, value) -> {
+                    ConvertibleDatapackStructure.doIfBlockElse(
+                            world,
+                            position,
+                            value,
+                            (position1, value1) -> {
+                                world.setBlockState(position1, value1.getDefaultState(), flags);
+                                return null;
+                            },
+                            (position12, value12) -> {
+                                world.setBlockState(position12, value12.getRandom(world.getRandom()).getDefaultState(), flags);
+                                return null;
+                            },
+                            (StructureIter.IterCallback<Void, Void>) (position13, value13) -> null
+                    );
+                    return null;
+                }
+        );
     }
 }
