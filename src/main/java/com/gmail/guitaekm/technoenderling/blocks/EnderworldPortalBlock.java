@@ -118,9 +118,9 @@ public class EnderworldPortalBlock extends Block implements HandleLongUseServer.
     final public boolean active;
     final public Block unactiveCounterpart;
     public static class LazyInformation {
-        protected ServerWorld enderworld;
-        protected int dimensionScaleInverse;
-        protected EnderlingStructure portal;
+        public ServerWorld enderworld;
+        public int dimensionScaleInverse;
+        public EnderlingStructure portal;
 
         protected LazyInformation(ServerWorld enderworld, int dimensionScaleInverse, EnderlingStructure portal) {
             this.enderworld = enderworld;
@@ -228,13 +228,17 @@ public class EnderworldPortalBlock extends Block implements HandleLongUseServer.
         );
     }
 
-    public static Stream<BlockPos> findPortalPosToOverworld(MinecraftServer server, BlockPos posEnderworld) {
+    public static BlockPos enderworldToOverworld(MinecraftServer server, BlockPos posEnderworld) {
         LazyInformation info = EnderworldPortalBlock.getInfo(server);
-        BlockPos posOverworld = new BlockPos(
+        return new BlockPos(
                 posEnderworld.getX() / info.dimensionScaleInverse,
                 posEnderworld.getY(),
                 posEnderworld.getZ() / info.dimensionScaleInverse
         );
+    }
+    public static Stream<BlockPos> findPortalPosToOverworld(MinecraftServer server, BlockPos posEnderworld) {
+        LazyInformation info = EnderworldPortalBlock.getInfo(server);
+        BlockPos posOverworld = EnderworldPortalBlock.enderworldToOverworld(server, posEnderworld);
         PointOfInterestStorage pointOfInterestStorage = server.getOverworld().getPointOfInterestStorage();
 
         // scraped and adjusted from net.minecraft.world.PortalForcer.getPortalRect
@@ -252,23 +256,35 @@ public class EnderworldPortalBlock extends Block implements HandleLongUseServer.
                 .filter(filterPos -> posOverworld.getX() == filterPos.getX())
                 .filter(filterPos -> posOverworld.getZ() == filterPos.getZ());
     }
-    public static Stream<BlockPos> findPortalPosToEnderworld(MinecraftServer server, BlockPos posOverworld) {
+    public static BlockPos overworldToEnderworldStart(MinecraftServer server, BlockPos posOverworld) {
         LazyInformation info = EnderworldPortalBlock.getInfo(server);
-        Vec3i vecStart = new Vec3i(
+        return new BlockPos(
                 posOverworld.getX() * info.dimensionScaleInverse,
                 posOverworld.getY(),
                 posOverworld.getZ() * info.dimensionScaleInverse
         );
-        BlockPos posMiddle = new BlockPos(
-                vecStart.getX() + info.dimensionScaleInverse / 2,
-                vecStart.getY(),
-                vecStart.getZ() + info.dimensionScaleInverse / 2
+    }
+    public static BlockPos overworldToEnderworldMiddle(MinecraftServer server, BlockPos posOverworld) {
+        LazyInformation info = EnderworldPortalBlock.getInfo(server);
+        return  new BlockPos(
+                posOverworld.getX() * info.dimensionScaleInverse + info.dimensionScaleInverse / 2,
+                posOverworld.getY(),
+                posOverworld.getZ() * info.dimensionScaleInverse + info.dimensionScaleInverse / 2
         );
-        Vec3i vecEnd = new Vec3i(
-                vecStart.getX() + info.dimensionScaleInverse - 1,
-                vecStart.getY(),
-                vecStart.getZ() + info.dimensionScaleInverse - 1
+    }
+    public static BlockPos overworldToEnderworldEnd(MinecraftServer server, BlockPos posOverworld) {
+        LazyInformation info = EnderworldPortalBlock.getInfo(server);
+        return new BlockPos(
+                posOverworld.getX() * info.dimensionScaleInverse + info.dimensionScaleInverse - 1,
+                posOverworld.getY(),
+                posOverworld.getZ() * info.dimensionScaleInverse + info.dimensionScaleInverse - 1
         );
+    }
+    public static Stream<BlockPos> findPortalPosToEnderworld(MinecraftServer server, BlockPos posOverworld) {
+        LazyInformation info = EnderworldPortalBlock.getInfo(server);
+        Vec3i vecStart = EnderworldPortalBlock.overworldToEnderworldStart(server, posOverworld);
+        BlockPos posMiddle = EnderworldPortalBlock.overworldToEnderworldMiddle(server, posOverworld);
+        Vec3i vecEnd = EnderworldPortalBlock.overworldToEnderworldEnd(server, posOverworld);
         PointOfInterestStorage pointOfInterestStorage = info.enderworld.getPointOfInterestStorage();
 
         // scraped and adjusted from net.minecraft.world.PortalForcer.getPortalRect

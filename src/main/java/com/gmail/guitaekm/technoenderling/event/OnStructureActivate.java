@@ -36,17 +36,10 @@ public class OnStructureActivate {
     public boolean callListeners(ServerPlayerEntity player, ServerWorld world, EnderlingStructure structure, BlockPos root) {
         for (Listener listener : this.listeners) {
             ActionResult result = listener.onStructureActivate(player, world, structure, root);
-            switch (result) {
-                case SUCCESS, CONSUME, CONSUME_PARTIAL -> {
-                    return true;
-                }
-                case FAIL -> {
-                    return false;
-                }
-                case PASS -> { }
-                default -> {
-                    assert false;
-                }
+            if (result.isAccepted()) {
+                return true;
+            } else if (result != ActionResult.PASS) {
+                return false;
             }
         }
         // when there is no listener, it shall just work

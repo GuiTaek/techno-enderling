@@ -2,10 +2,10 @@ package com.gmail.guitaekm.technoenderling.event;
 
 import com.gmail.guitaekm.technoenderling.TechnoEnderling;
 import com.gmail.guitaekm.technoenderling.blocks.EnderworldPortalBlock;
-import com.gmail.guitaekm.technoenderling.blocks.ModBlocks;
 import com.gmail.guitaekm.technoenderling.features.EnderlingStructure;
 import com.gmail.guitaekm.technoenderling.items.ModItems;
 import com.gmail.guitaekm.technoenderling.utils.DimensionFinder;
+import com.gmail.guitaekm.technoenderling.utils.TeleportParams;
 import com.google.common.collect.Sets;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -18,9 +18,8 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.util.math.*;
+import org.apache.logging.log4j.core.jmx.Server;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -39,6 +38,7 @@ public class LinkEnderworldPortals implements OnStructureActivate.Listener {
             return ActionResult.PASS;
         }
         ServerWorld otherWorld, enderworld;
+        Optional<BlockPos> otherRoot;
         DimensionFinder finder = new DimensionFinder(new Identifier(TechnoEnderling.MOD_ID, "enderworld"));
         finder.lazyInit(world.getServer());
         enderworld = world.getServer().getWorld(
@@ -47,24 +47,102 @@ public class LinkEnderworldPortals implements OnStructureActivate.Listener {
         assert enderworld != null;
         if (world.equals(world.getServer().getOverworld())) {
             otherWorld = enderworld;
+            otherRoot =  LinkEnderworldPortals.findPortalSpawnEnderworld(player, enderworld, root);
         } else if (world.equals(enderworld)) {
             otherWorld = world.getServer().getOverworld();
+            otherRoot = LinkEnderworldPortals.findPortalSpawnOverworld(player, otherWorld, root);
         } else {
-            return ActionResult.SUCCESS;
+            return ActionResult.PASS;
+        }
+        if (otherRoot.isEmpty()) {
+            return ActionResult.PASS;
         }
         if (LinkEnderworldPortals.tryTakePortalItems(player)) {
-            // temporary
-            BlockPos otherRoot = new BlockPos(0, 80, 0);
-            buildPlatformAndClearRoom(otherWorld, player, otherRoot);
-            portal.getPlaceable().generate(otherWorld, otherRoot);
-            return ActionResult.SUCCESS;
+            buildPlatformAndClearRoom(otherWorld, player, otherRoot.get());
+            portal.getPlaceable().generate(otherWorld, otherRoot.get());
+            return ActionResult.PASS;
         }
         return ActionResult.FAIL;
     }
 
-    public static Optional<BlockPos> findPortalSpawnEnderworld(BlockPos overworldPos) {
-        // todo: implement
-        return Optional.empty();
+    /**
+     * gives the exact position of the portal that is to be placed / recreated
+     * @param player the player who is trying to activate the portal
+     * @param enderworld the enderworld dimension
+     * @param overworldPos the position of the deactivated, placed portal in the overworld
+     * @return
+     */
+    public static Optional<BlockPos> findPortalSpawnEnderworld(
+            ServerPlayerEntity player,
+            ServerWorld enderworld,
+            BlockPos overworldPos) {
+        List<BlockPos> possiblePortals = EnderworldPortalBlock.findPortalPosToEnderworld(enderworld.getServer(), overworldPos).toList();
+        BlockPos start = EnderworldPortalBlock.overworldToEnderworldStart(enderworld.getServer(), overworldPos);
+        BlockPos end = EnderworldPortalBlock.overworldToEnderworldEnd(enderworld.getServer(), overworldPos);
+        BlockPos randomPosition = new BlockPos(
+                MathHelper.nextBetween(enderworld.getRandom(), start.getX(), end.getX()),
+                MathHelper.nextBetween(enderworld.getRandom(), start.getY(), end.getY()),
+                MathHelper.nextBetween(enderworld.getRandom(), start.getZ(), end.getZ())
+                );
+        return findPortalSpawnHelper(
+                player,
+                enderworld,
+                possiblePortals,
+                overworldPos,
+                randomPosition
+        );
+    }
+
+    /**
+     * gives the exact position of the portal that is to be placed / recreated
+     * @param player the player who is trying to activate the portal
+     * @param overworld the overworld dimension
+     * @param enderworldPos the position of the deactivated, placed portal in the enderworld
+     * @return
+     */
+    public static Optional<BlockPos> findPortalSpawnOverworld(ServerPlayerEntity player, ServerWorld overworld, BlockPos enderworldPos) {
+        List<BlockPos> possiblePortals = EnderworldPortalBlock.findPortalPosToOverworld(overworld.getServer(), enderworldPos).toList();
+        return findPortalSpawnHelper(
+                player,
+                overworld,
+                possiblePortals,
+                enderworldPos,
+                EnderworldPortalBlock.enderworldToOverworld(overworld.getServer(), enderworldPos)
+        );
+    }
+
+    /**
+     * this function removes code duplication from findPortalSpawnEnderworld and findPortalSpawnOverworld
+     * @param player the player initiating the portal linking
+     * @param destinationWorld the destination dimension of the linked portal
+     * @param fromPos the position of the deactivated, built portal in the dimension the player currently is
+     * @return the exact position of the portal to be built
+     */
+    public static Optional<BlockPos> findPortalSpawnHelper(ServerPlayerEntity player, ServerWorld destinationWorld, List<BlockPos> possiblePortals, BlockPos fromPos, BlockPos forcedSpawn) {
+        if (!possiblePortals.isEmpty()) {
+            TeleportParams params = EnderworldPortalBlock.getTeleportParamsWithTargetPortalPositions(
+                    destinationWorld.getServer(),
+                    destinationWorld,
+                    player,
+                    possiblePortals,
+                    fromPos
+            );
+            if (params == null) {
+                return possiblePortals
+                        .stream().min(new Comparator<BlockPos>() {
+                            public Integer mappedValue(BlockPos pos) {
+                                return Math.abs(pos.getY() - fromPos.getY());
+                            }
+
+                            @Override
+                            public int compare(BlockPos left, BlockPos right) {
+                                return mappedValue(left).compareTo(mappedValue(right));
+                            }
+                        });
+            }
+            return Optional.empty();
+        }
+        return Optional.of(forcedSpawn);
     }
 
     /**
