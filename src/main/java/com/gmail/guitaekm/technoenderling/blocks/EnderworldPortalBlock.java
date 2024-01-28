@@ -173,16 +173,23 @@ public class EnderworldPortalBlock extends Block implements HandleLongUseServer.
         if (player.getWorld().getRegistryKey().getValue().toString().equals("technoenderling:enderworld")) {
             ServerWorld destination = server.getOverworld();
             List<BlockPos> portalStream = EnderworldPortalBlock.findPortalPosToOverworld(server, pos).toList();
-            this.teleportWithTargetPortalPositions(server, destination, player, portalStream, pos);
+            TeleportParams params = EnderworldPortalBlock.getTeleportParamsWithTargetPortalPositions(server, destination, player, portalStream, pos);
+            if (params == null) {
+                return;
+            }
+            VehicleTeleport.teleportWithVehicle(params);
         } else {
             ServerWorld destination = info.enderworld;
             List<BlockPos> portalStream = EnderworldPortalBlock.findPortalPosToEnderworld(server, pos).toList();
-            this.teleportWithTargetPortalPositions(server, destination, player, portalStream, pos);
-
+            TeleportParams params = EnderworldPortalBlock.getTeleportParamsWithTargetPortalPositions(server, destination, player, portalStream, pos);
+            if (params == null) {
+                return;
+            }
+            VehicleTeleport.teleportWithVehicle(params);
         }
     }
 
-    protected void teleportWithTargetPortalPositions(
+    public static @Nullable TeleportParams getTeleportParamsWithTargetPortalPositions(
             MinecraftServer server,
             ServerWorld destination,
             ServerPlayerEntity player,
@@ -190,7 +197,7 @@ public class EnderworldPortalBlock extends Block implements HandleLongUseServer.
             BlockPos oldPortalPos
     ) {
         int[][] offsets = player.hasVehicle() ? EnderworldPortalBlock.VEHICLE_RESPAWN_OFFSET : EnderworldPortalBlock.RESPAWN_OFFSETS;
-        Optional<BlockPos> chosenPortal = this.getValidPortal(
+        Optional<BlockPos> chosenPortal = EnderworldPortalBlock.getValidPortal(
             portalPositions,
             server,
             destination,
@@ -199,7 +206,7 @@ public class EnderworldPortalBlock extends Block implements HandleLongUseServer.
             offsets
         );
         if (chosenPortal.isEmpty()) {
-            return;
+            return null;
         }
         Optional<Vec3d> destPosOptional = VehicleTeleport.findWakeUpPosition(
                 player,
@@ -211,14 +218,14 @@ public class EnderworldPortalBlock extends Block implements HandleLongUseServer.
         // as this was checked inside getSpawnPositionFromStream, this should never happen
         assert destPosOptional.isPresent();
         Vec3d destPos = destPosOptional.get();
-        VehicleTeleport.teleportWithVehicle(new TeleportParams(
+        return new TeleportParams(
                 player,
                 destination,
                 chosenPortal.get(),
                 destPos.getX(),
                 destPos.getY(),
                 destPos.getZ()
-        ));
+        );
     }
 
     public static Stream<BlockPos> findPortalPosToOverworld(MinecraftServer server, BlockPos posEnderworld) {
@@ -280,7 +287,7 @@ public class EnderworldPortalBlock extends Block implements HandleLongUseServer.
                 .filter(filterPos -> vecStart.getZ() <= filterPos.getZ() && filterPos.getZ() <= vecEnd.getZ());
     }
 
-    public Optional<BlockPos> getValidPortal(
+    public static Optional<BlockPos> getValidPortal(
             List<BlockPos> possiblePortals,
             MinecraftServer server,
             ServerWorld destination,
