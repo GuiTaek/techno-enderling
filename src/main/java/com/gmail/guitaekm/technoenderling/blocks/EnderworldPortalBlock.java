@@ -117,7 +117,7 @@ public class EnderworldPortalBlock extends Block implements HandleLongUseServer.
     final public int index;
     final public boolean active;
     final public Block unactiveCounterpart;
-    protected static class LazyInformation {
+    public static class LazyInformation {
         protected ServerWorld enderworld;
         protected int dimensionScaleInverse;
         protected EnderlingStructure portal;
@@ -128,10 +128,10 @@ public class EnderworldPortalBlock extends Block implements HandleLongUseServer.
             this.portal = portal;
         }
     }
-    protected @Nullable LazyInformation info;
+    protected static @Nullable LazyInformation info;
 
-    protected LazyInformation getInfo(MinecraftServer server) {
-        if (this.info != null) {
+    public static LazyInformation getInfo(MinecraftServer server) {
+        if (EnderworldPortalBlock.info != null) {
             return info;
         }
         DimensionFinder enderworldFinder = new DimensionFinder(
@@ -149,7 +149,8 @@ public class EnderworldPortalBlock extends Block implements HandleLongUseServer.
                 .get(new Identifier(TechnoEnderling.MOD_ID, "enderworld_portal"));
         assert portalOptional.isPresent();
         EnderlingStructure portal = portalOptional.get();
-        return new LazyInformation(enderworld, dimensionScaleInverse, portal);
+        EnderworldPortalBlock.info = new LazyInformation(enderworld, dimensionScaleInverse, portal);
+        return EnderworldPortalBlock.info;
     }
 
     public EnderworldPortalBlock(Settings settings, int index, boolean active, Block unactiveCounterpart) {
@@ -162,7 +163,7 @@ public class EnderworldPortalBlock extends Block implements HandleLongUseServer.
 
     @Override
     public void onUse(MinecraftServer server, ServerPlayerEntity player, BlockPos pos) {
-        LazyInformation info = this.getInfo(server);
+        LazyInformation info = EnderworldPortalBlock.getInfo(server);
         if(player.getWorld().getBlockState(pos).getBlock() != this) {
             return;
         }
@@ -171,11 +172,11 @@ public class EnderworldPortalBlock extends Block implements HandleLongUseServer.
         }
         if (player.getWorld().getRegistryKey().getValue().toString().equals("technoenderling:enderworld")) {
             ServerWorld destination = server.getOverworld();
-            List<BlockPos> portalStream = this.findPortalPosToOverworld(server, pos).toList();
+            List<BlockPos> portalStream = EnderworldPortalBlock.findPortalPosToOverworld(server, pos).toList();
             this.teleportWithTargetPortalPositions(server, destination, player, portalStream, pos);
         } else {
             ServerWorld destination = info.enderworld;
-            List<BlockPos> portalStream = this.findPortalPosToEnderworld(server, pos).toList();
+            List<BlockPos> portalStream = EnderworldPortalBlock.findPortalPosToEnderworld(server, pos).toList();
             this.teleportWithTargetPortalPositions(server, destination, player, portalStream, pos);
 
         }
@@ -220,8 +221,8 @@ public class EnderworldPortalBlock extends Block implements HandleLongUseServer.
         ));
     }
 
-    protected Stream<BlockPos> findPortalPosToOverworld(MinecraftServer server, BlockPos posEnderworld) {
-        LazyInformation info = this.getInfo(server);
+    public static Stream<BlockPos> findPortalPosToOverworld(MinecraftServer server, BlockPos posEnderworld) {
+        LazyInformation info = EnderworldPortalBlock.getInfo(server);
         BlockPos posOverworld = new BlockPos(
                 posEnderworld.getX() / info.dimensionScaleInverse,
                 posEnderworld.getY(),
@@ -244,8 +245,8 @@ public class EnderworldPortalBlock extends Block implements HandleLongUseServer.
                 .filter(filterPos -> posOverworld.getX() == filterPos.getX())
                 .filter(filterPos -> posOverworld.getZ() == filterPos.getZ());
     }
-    protected Stream<BlockPos> findPortalPosToEnderworld(MinecraftServer server, BlockPos posOverworld) {
-        LazyInformation info = this.getInfo(server);
+    public static Stream<BlockPos> findPortalPosToEnderworld(MinecraftServer server, BlockPos posOverworld) {
+        LazyInformation info = EnderworldPortalBlock.getInfo(server);
         Vec3i vecStart = new Vec3i(
                 posOverworld.getX() * info.dimensionScaleInverse,
                 posOverworld.getY(),
@@ -279,7 +280,7 @@ public class EnderworldPortalBlock extends Block implements HandleLongUseServer.
                 .filter(filterPos -> vecStart.getZ() <= filterPos.getZ() && filterPos.getZ() <= vecEnd.getZ());
     }
 
-    protected Optional<BlockPos> getValidPortal(
+    public Optional<BlockPos> getValidPortal(
             List<BlockPos> possiblePortals,
             MinecraftServer server,
             ServerWorld destination,
@@ -287,7 +288,7 @@ public class EnderworldPortalBlock extends Block implements HandleLongUseServer.
             int yToFind,
             int[][] offsets
     ) {
-        LazyInformation info = this.getInfo(server);
+        LazyInformation info = EnderworldPortalBlock.getInfo(server);
         WorldBorder worldBorder = destination.getWorldBorder();
         info.portal.getConvertible().lazyInit(server);
         List<Vec3i> convertibleOffsets = info.portal.getConvertible().getOffsets();
@@ -322,7 +323,7 @@ public class EnderworldPortalBlock extends Block implements HandleLongUseServer.
         if (world.isClient()) {
             return super.getStateForNeighborUpdate(state, direction, neighborState, world, pos, neighborPos);
         }
-        LazyInformation info = this.getInfo(world.getServer());
+        LazyInformation info = EnderworldPortalBlock.getInfo(world.getServer());
         if (info.portal.getPlaceable().checkStructureOnPos(
                 (ServerWorld) world,
                 pos,

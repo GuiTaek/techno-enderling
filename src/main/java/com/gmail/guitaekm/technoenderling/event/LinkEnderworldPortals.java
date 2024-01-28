@@ -1,6 +1,8 @@
 package com.gmail.guitaekm.technoenderling.event;
 
 import com.gmail.guitaekm.technoenderling.TechnoEnderling;
+import com.gmail.guitaekm.technoenderling.blocks.EnderworldPortalBlock;
+import com.gmail.guitaekm.technoenderling.blocks.ModBlocks;
 import com.gmail.guitaekm.technoenderling.features.EnderlingStructure;
 import com.gmail.guitaekm.technoenderling.items.ModItems;
 import com.gmail.guitaekm.technoenderling.utils.DimensionFinder;
@@ -58,6 +60,11 @@ public class LinkEnderworldPortals implements OnStructureActivate.Listener {
             return ActionResult.SUCCESS;
         }
         return ActionResult.FAIL;
+    }
+
+    public static Optional<BlockPos> findPortalSpawnEnderworld(BlockPos overworldPos) {
+        // todo: implement
+        return Optional.empty();
     }
 
     /**
@@ -189,28 +196,6 @@ public class LinkEnderworldPortals implements OnStructureActivate.Listener {
     }
 
     public static void clearRoom(ServerWorld world, BlockPos pos) {
-        /*
-        // configure
-        for (int x = -3; x <= 3; x++) {
-            int y = 2;
-            for (int z = -3; z <= 3; z++) {
-                if (world.getBlockState(pos).isSideSolidFullSquare(
-                        world,
-                        pos,
-                        Direction.UP
-                )) {
-                    continue;
-                }
-                BlockPos toBreak = pos.add(x, y, z);
-                Block.dropStacks(world.getBlockState(pos), world, toBreak);
-                world.setBlockState(
-                        toBreak,
-                        Blocks.AIR.getDefaultState(),
-                        Block.NOTIFY_LISTENERS | Block.FORCE_STATE
-                );
-            }
-        }
-        */
         // configure
         for (int x = -3; x <= 3; x++) {
             for (int y = -1; y <= 1; y++) {
