@@ -205,7 +205,7 @@ public class LinkEnderworldPortals implements OnStructureActivate.Listener {
                     world.setBlockState(
                             toBreak,
                             Blocks.AIR.getDefaultState(),
-                            Block.NOTIFY_LISTENERS | Block.FORCE_STATE
+                            Block.NOTIFY_ALL | Block.FORCE_STATE
                     );
                 }
             }
