@@ -231,9 +231,9 @@ public class EnderworldPortalBlock extends Block implements HandleLongUseServer.
     public static Stream<BlockPos> findPortalPosToOverworld(MinecraftServer server, BlockPos posEnderworld) {
         LazyInformation info = EnderworldPortalBlock.getInfo(server);
         BlockPos posOverworld = new BlockPos(
-                posEnderworld.getX() / info.dimensionScaleInverse,
+                Math.floorDiv(posEnderworld.getX(), info.dimensionScaleInverse),
                 posEnderworld.getY(),
-                posEnderworld.getZ() / info.dimensionScaleInverse
+                Math.floorDiv(posEnderworld.getZ(), info.dimensionScaleInverse)
         );
         PointOfInterestStorage pointOfInterestStorage = server.getOverworld().getPointOfInterestStorage();
 
