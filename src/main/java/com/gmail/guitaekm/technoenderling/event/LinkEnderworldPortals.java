@@ -201,7 +201,7 @@ public class LinkEnderworldPortals implements OnStructureActivate.Listener {
             for (int y = -1; y <= 1; y++) {
                 for (int z = -3; z <= 3; z++) {
                     BlockPos toBreak = pos.add(x, y, z);
-                    Block.dropStacks(world.getBlockState(pos), world, toBreak);
+                    Block.dropStacks(world.getBlockState(toBreak), world, toBreak);
                     world.setBlockState(
                             toBreak,
                             Blocks.AIR.getDefaultState(),
