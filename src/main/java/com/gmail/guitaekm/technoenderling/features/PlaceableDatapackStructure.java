@@ -11,6 +11,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.StructureWorldAccess;
+import net.minecraft.world.WorldAccess;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -47,6 +48,13 @@ public class PlaceableDatapackStructure {
             throw new IllegalArgumentException("Expects for the blocks two names, separated by a colon");
         }
         return Registry.BLOCK.get(new Identifier(vals[0], vals[1])).getDefaultState();
+    }
+
+    public Vec3i size() {
+        int y = this.structure.size();
+        int x = this.structure.get(0).size();
+        int z = this.structure.get(0).get(0).size();
+        return new Vec3i(x, y, z);
     }
 
     public void generate(StructureWorldAccess world, BlockPos pos) {
@@ -91,7 +99,7 @@ public class PlaceableDatapackStructure {
         );
         return rawOffsets.stream().filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
     }
-    public Optional<BlockPos> checkStructureOnPos(ServerWorld server, BlockPos pos, List<Vec3i> offsets) {
+    public Optional<BlockPos> checkStructureOnPos(WorldAccess server, BlockPos pos, List<Vec3i> offsets) {
         assert this.structure != null;
         return offsets.stream().filter(
                 (Vec3i offset) -> StructureIter.iterStructureList(
@@ -101,7 +109,7 @@ public class PlaceableDatapackStructure {
                 ).stream().filter((Boolean res) -> !res).findFirst().isEmpty()
         ).findFirst().map(pos::add);
     }
-    protected static boolean checkBlock(ServerWorld server, BlockPos pos, BlockState toCheck) {
+    protected static boolean checkBlock(WorldAccess server, BlockPos pos, BlockState toCheck) {
         return server.getBlockState(pos).equals(toCheck);
     }
 }

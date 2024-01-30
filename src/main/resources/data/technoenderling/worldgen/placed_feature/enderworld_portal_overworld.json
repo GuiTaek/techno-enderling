@@ -1,12 +1,12 @@
 {
-  "feature": "technoenderling:warped_fungus_enderworld",
+  "feature": "technoenderling:enderworld_portal_overworld",
   "placement": [
     {
       "count": {
         "distribution": [
           {
             "data": 0,
-            "weight": 50
+            "weight": 200
           },
           {
             "data": 1,
@@ -25,7 +25,7 @@
       "type": "minecraft:surface_water_depth_filter"
     },
     {
-      "heightmap": "OCEAN_FLOOR",
+      "heightmap": "MOTION_BLOCKING_NO_LEAVES",
       "type": "minecraft:heightmap"
     },
     {

@@ -348,7 +348,7 @@ public class EnderworldPortalBlock extends Block implements HandleLongUseServer.
         }
         LazyInformation info = EnderworldPortalBlock.getInfo(world.getServer());
         if (info.portal.getPlaceable().checkStructureOnPos(
-                (ServerWorld) world,
+                world,
                 pos,
                 info.portal.getPlaceable().getAllAvailableOffsets()
                 ).isEmpty()

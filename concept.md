@@ -59,10 +59,10 @@ that you spawned in when entering a one-way-portal)
 # buildable structues
 ## portal
 - [x] every player can use it
-- [ ] spawn naturally and activated in the overworld but nowhere else
+- [x] spawn naturally and activated in the overworld but nowhere else
 - [ ] when spawned naturally in the overworld, they automatically link to a portal on the surface of the enderworld
-  - [ ] it is meant to be easy to find one
-- [ ] is build out of a glowstone block and two gold Blocks above, however not
+  - [x] it is meant to be easy to find one
+- [x] is build out of a glowstone block and two gold Blocks above, however not
 the raw blocks but blocks that have been made useless with ender essence. The glowstone
 blocks drops raw glowstone dust
 - [x] right-clicking and holding teleports you after some time (todo: pretty animation like e.g. particles and FOV)
