@@ -29,7 +29,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LinkEnderworldPortalOnGenerate implements OnStructureGenerate.Listener, ServerLifecycleEvents.ServerStarted {
+public class LinkEnderworldPortalOnGenerate implements OnStructureGenerate.Listener, ServerLifecycleEvents.ServerStarted, ServerLifecycleEvents.ServerStopped {
     final private static LinkEnderworldPortalOnGenerate instance = new LinkEnderworldPortalOnGenerate();
     private MinecraftServer server;
     public static LinkEnderworldPortalOnGenerate getInstance() {
@@ -39,6 +39,7 @@ public class LinkEnderworldPortalOnGenerate implements OnStructureGenerate.Liste
     public static void register() {
         OnStructureGenerate.getInstance().register(LinkEnderworldPortalOnGenerate.getInstance());
         ServerLifecycleEvents.SERVER_STARTED.register(LinkEnderworldPortalOnGenerate.getInstance());
+        ServerLifecycleEvents.SERVER_STOPPED.register(LinkEnderworldPortalOnGenerate.getInstance());
     }
 
     public void beLazy(WorldAccess world, EnderlingStructure portal, BlockPos rootOverworld) {
@@ -103,5 +104,14 @@ public class LinkEnderworldPortalOnGenerate implements OnStructureGenerate.Liste
         for (BlockPos root : this.toGenerate) {
             this.generateOtherPortal(this.overworld, this.portal, root);
         }
+        this.toGenerate.clear();
+    }
+
+    @Override
+    public void onServerStopped(MinecraftServer server) {
+        this.server = null;
+        this.toGenerate.clear();
+        this.overworld = null;
+        this.portal = null;
     }
 }

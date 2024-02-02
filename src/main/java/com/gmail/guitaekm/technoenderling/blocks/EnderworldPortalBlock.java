@@ -8,6 +8,7 @@ import com.gmail.guitaekm.technoenderling.point_of_interest.ModPointsOfInterest;
 import com.gmail.guitaekm.technoenderling.utils.DimensionFinder;
 import com.gmail.guitaekm.technoenderling.utils.TeleportParams;
 import com.gmail.guitaekm.technoenderling.utils.VehicleTeleport;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.server.MinecraftServer;
@@ -162,6 +163,15 @@ public class EnderworldPortalBlock extends Block implements HandleLongUseServer.
         this.unactiveCounterpart = unactiveCounterpart;
         HandleLongUseServer.register(this);
         setDefaultState(getDefaultState().with(GENERATED, false));
+    }
+
+    public static void register() {
+        ServerLifecycleEvents.SERVER_STOPPED.register(new ServerLifecycleEvents.ServerStopped() {
+            @Override
+            public void onServerStopped(MinecraftServer server) {
+                EnderworldPortalBlock.info = null;
+            }
+        });
     }
 
     @Override

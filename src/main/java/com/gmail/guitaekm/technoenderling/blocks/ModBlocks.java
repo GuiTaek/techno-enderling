@@ -78,5 +78,8 @@ public class ModBlocks {
                 new Identifier(TechnoEnderling.MOD_ID, "infused_gold_block"),
                 ModBlocks.INFUSED_GOLD_BLOCK
         );
+
+        // removes information that will be outdated when the server stops but the game continue
+        EnderworldPortalBlock.register();
     }
 }
