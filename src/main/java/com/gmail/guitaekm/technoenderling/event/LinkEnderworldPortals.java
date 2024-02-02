@@ -19,6 +19,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.*;
+import net.minecraft.world.WorldAccess;
 import org.apache.logging.log4j.core.jmx.Server;
 import org.jetbrains.annotations.Nullable;
 
@@ -34,6 +35,10 @@ public class LinkEnderworldPortals implements OnStructureActivate.Listener {
     }
     @Override
     public ActionResult onStructureActivate(ServerPlayerEntity player, ServerWorld world, EnderlingStructure portal, BlockPos root) {
+        return LinkEnderworldPortals.placePortal(player, world, portal, root);
+    }
+
+    public static ActionResult placePortal (ServerPlayerEntity player, ServerWorld world, EnderlingStructure portal, BlockPos root) {
         if (!portal.getId().equals(new Identifier(TechnoEnderling.MOD_ID, "enderworld_portal"))) {
             return ActionResult.PASS;
         }
@@ -65,6 +70,17 @@ public class LinkEnderworldPortals implements OnStructureActivate.Listener {
         return ActionResult.FAIL;
     }
 
+    public static BlockPos overworldToEnderworldRandom(WorldAccess enderworld, BlockPos overworldPos) {
+        Random random = enderworld.getRandom();
+        BlockPos start = EnderworldPortalBlock.overworldToEnderworldStart(enderworld.getServer(), overworldPos);
+        BlockPos end = EnderworldPortalBlock.overworldToEnderworldEnd(enderworld.getServer(), overworldPos);
+        return  new BlockPos(
+                MathHelper.nextBetween(random, start.getX(), end.getX()),
+                MathHelper.nextBetween(random, start.getY(), end.getY()),
+                MathHelper.nextBetween(random, start.getZ(), end.getZ())
+        );
+    }
+
     /**
      * gives the exact position of the portal that is to be placed / recreated
      * @param player the player who is trying to activate the portal
@@ -77,13 +93,7 @@ public class LinkEnderworldPortals implements OnStructureActivate.Listener {
             ServerWorld enderworld,
             BlockPos overworldPos) {
         List<BlockPos> possiblePortals = EnderworldPortalBlock.findPortalPosToEnderworld(enderworld.getServer(), overworldPos).toList();
-        BlockPos start = EnderworldPortalBlock.overworldToEnderworldStart(enderworld.getServer(), overworldPos);
-        BlockPos end = EnderworldPortalBlock.overworldToEnderworldEnd(enderworld.getServer(), overworldPos);
-        BlockPos randomPosition = new BlockPos(
-                MathHelper.nextBetween(enderworld.getRandom(), start.getX(), end.getX()),
-                MathHelper.nextBetween(enderworld.getRandom(), start.getY(), end.getY()),
-                MathHelper.nextBetween(enderworld.getRandom(), start.getZ(), end.getZ())
-                );
+        BlockPos randomPosition = overworldToEnderworldRandom(enderworld, overworldPos);
         return findPortalSpawnHelper(
                 player,
                 enderworld,

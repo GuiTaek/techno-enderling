@@ -37,6 +37,9 @@ public class PlaceableDatapackStructure {
             structure.add(layerList);
         }
     }
+    public List<List<List<@Nullable BlockState>>> getStructure() {
+        return this.structure;
+    }
     protected static @Nullable BlockState getBlockState(String content) {
         // empty strings won't replace existing Blocks
         content = content.strip();
@@ -57,7 +60,7 @@ public class PlaceableDatapackStructure {
         return new Vec3i(x, y, z);
     }
 
-    public void generate(StructureWorldAccess world, BlockPos pos) {
+    public void generate(WorldAccess world, BlockPos pos) {
         this.generate(world, pos, Block.NOTIFY_LISTENERS | Block.FORCE_STATE);
     }
 
@@ -67,7 +70,7 @@ public class PlaceableDatapackStructure {
      * @param pos the position of the center block
      * @param flags passed to world.setBlockState
      */
-    public void generate(StructureWorldAccess world, BlockPos pos, int flags) {
+    public void generate(WorldAccess world, BlockPos pos, int flags) {
         ListIterator<List<List<BlockState>>> layerIter = this.structure.listIterator();
         while(layerIter.hasNext()) {
             int y = layerIter.nextIndex();

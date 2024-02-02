@@ -13,6 +13,8 @@ import net.minecraft.block.BlockState;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.state.StateManager;
+import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.*;
 import net.minecraft.world.WorldAccess;
@@ -117,11 +119,11 @@ public class EnderworldPortalBlock extends Block implements HandleLongUseServer.
     final public int index;
     final public boolean active;
     final public Block unactiveCounterpart;
+    public static final BooleanProperty GENERATED = BooleanProperty.of("generated");
     public static class LazyInformation {
         public ServerWorld enderworld;
         public int dimensionScaleInverse;
         public EnderlingStructure portal;
-
         protected LazyInformation(ServerWorld enderworld, int dimensionScaleInverse, EnderlingStructure portal) {
             this.enderworld = enderworld;
             this.dimensionScaleInverse = dimensionScaleInverse;
@@ -159,8 +161,13 @@ public class EnderworldPortalBlock extends Block implements HandleLongUseServer.
         this.active = active;
         this.unactiveCounterpart = unactiveCounterpart;
         HandleLongUseServer.register(this);
+        setDefaultState(getDefaultState().with(GENERATED, false));
     }
 
+    @Override
+    protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
+        builder.add(GENERATED);
+    }
     @Override
     public void onUse(MinecraftServer server, ServerPlayerEntity player, BlockPos pos) {
         LazyInformation info = EnderworldPortalBlock.getInfo(server);

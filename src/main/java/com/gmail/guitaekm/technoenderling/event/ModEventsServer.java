@@ -7,5 +7,6 @@ public class ModEventsServer {
     public static void registerEvents() {
         ServerTickEvents.END_SERVER_TICK.register(new DarknessApplierServer());
         LinkEnderworldPortals.getInstance().registerClass();
+        LinkEnderworldPortalOnGenerate.register();
     }
 }

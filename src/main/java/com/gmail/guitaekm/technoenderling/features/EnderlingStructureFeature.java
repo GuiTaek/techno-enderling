@@ -1,5 +1,6 @@
 package com.gmail.guitaekm.technoenderling.features;
 
+import com.gmail.guitaekm.technoenderling.event.OnStructureGenerate;
 import com.mojang.serialization.Codec;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
@@ -15,6 +16,7 @@ import java.util.Optional;
 import java.util.Random;
 
 public class EnderlingStructureFeature extends Feature<EnderlingStructureFeatureConfig> {
+    public static EnderlingStructureFeatureConfig config;
 
     public EnderlingStructureFeature(Codec<EnderlingStructureFeatureConfig> configCodec) {
         super(configCodec);
@@ -28,6 +30,7 @@ public class EnderlingStructureFeature extends Feature<EnderlingStructureFeature
         BlockPos origin = context.getOrigin();
         // we won't use the random here, but we could if we wanted to
         EnderlingStructureFeatureConfig config = context.getConfig();
+        EnderlingStructureFeature.config = config;
 
         // don't worry about where these come from-- we'll implement these methods soon
         Identifier structureId = config.structureId();
@@ -37,10 +40,14 @@ public class EnderlingStructureFeature extends Feature<EnderlingStructureFeature
             return false;
         }
         EnderlingStructure structure = structureOptional.get();
+        // -2 so the first layer is on the ground
         Vec3i sizeOffset = structure.getPlaceable().size().add(new Vec3i(-1, -2, -1));
         BlockPos toPlace = origin
                 .add(offset)  // I need this config for the reactors in ender villages
                 .add(sizeOffset); // so the structures get placed on the ground
+        if (!OnStructureGenerate.getInstance().callListeners(world, structure, toPlace)) {
+            return false;
+        }
         structure.getPlaceable().generate(world, toPlace.subtract(offset), Block.REDRAW_ON_MAIN_THREAD);
         return true;
     }
