@@ -8,6 +8,7 @@ import com.gmail.guitaekm.technoenderling.point_of_interest.ModPointsOfInterest;
 import com.gmail.guitaekm.technoenderling.resources.ModResourcesServer;
 import com.gmail.guitaekm.technoenderling.event.ModEventsServer;
 import com.gmail.guitaekm.technoenderling.networking.ModNetworking;
+import com.gmail.guitaekm.technoenderling.utils.VehicleTeleport;
 import net.fabricmc.api.DedicatedServerModInitializer;
 
 public class TechnoEnderlingServer implements DedicatedServerModInitializer {
@@ -21,5 +22,6 @@ public class TechnoEnderlingServer implements DedicatedServerModInitializer {
 		EnderlingStructureRegistry.registerClass();
 		ModPointsOfInterest.registerClass();
 		ModFeatures.register();
+		VehicleTeleport.register();
 	}
 }

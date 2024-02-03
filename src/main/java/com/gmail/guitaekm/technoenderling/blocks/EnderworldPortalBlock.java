@@ -166,12 +166,7 @@ public class EnderworldPortalBlock extends Block implements HandleLongUseServer.
     }
 
     public static void register() {
-        ServerLifecycleEvents.SERVER_STOPPED.register(new ServerLifecycleEvents.ServerStopped() {
-            @Override
-            public void onServerStopped(MinecraftServer server) {
-                EnderworldPortalBlock.info = null;
-            }
-        });
+        ServerLifecycleEvents.SERVER_STOPPED.register(server -> EnderworldPortalBlock.info = null);
     }
 
     @Override

@@ -1,17 +1,25 @@
 package com.gmail.guitaekm.technoenderling.utils;
 
+import com.gmail.guitaekm.technoenderling.TechnoEnderling;
 import com.gmail.guitaekm.technoenderling.blocks.TreeTraverser;
+import com.gmail.guitaekm.technoenderling.networking.ModNetworking;
+import com.gmail.guitaekm.technoenderling.networking.WaitMountingPacket;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.SpawnRestriction;
+import net.minecraft.network.PacketByteBuf;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.*;
 import net.minecraft.world.SpawnHelper;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Stack;
+import java.text.MessageFormat;
+import java.util.*;
 
 public class VehicleTeleport {
     protected static int[][] VEHICLE_SPAWN_CHECK_OFFSET = {
@@ -25,13 +33,14 @@ public class VehicleTeleport {
             {-1, 0, 0},
             {-1, 0, 1}
     };
+    protected static Map<Integer, TreeTraverser<Entity>> unmountedPlayers = new HashMap<>();
     public static void teleportWithVehicle(TeleportParams params) {
         TreeTraverser<Entity> treeTraverser = TreeTraverser.parseVertex(
                 params.player.getRootVehicle(),
                 Entity::getPassengerList,
                 entity -> {
                     if(entity.hasVehicle()) {
-                        entity.dismountVehicle();
+                        entity.stopRiding();
                     }
                     return teleportUnmountedEntity(entity, params.targetWorld, params.portalPos, params.x, params.y, params.z);
                 });
@@ -41,7 +50,25 @@ public class VehicleTeleport {
         // portal I tried tinkering this, nothing what I tried worked consistantly
         // thinking of custom vehicles like e.g. create I think we're all better not supporting staying in the
         // vehicle on teleport
-        //treeTraverser.depthFirstSearch((parent, child) -> child.startRiding(parent, true));
+        // treeTraverser.depthFirstSearch((parent, child) -> child.startRiding(parent, true));
+        VehicleTeleport.unmountedPlayers.put(params.player.getId(), treeTraverser);
+        PacketByteBuf buf = PacketByteBufs.create();
+        new WaitMountingPacket(params.targetWorld, treeTraverser).writeToBuf(buf);
+        ServerPlayNetworking.send(params.player, ModNetworking.ASK_WAITING_MOUNTING, buf);
+    }
+
+    public static void register() {
+        ServerLifecycleEvents.SERVER_STOPPED.register(server -> VehicleTeleport.unmountedPlayers.clear());
+    }
+
+    public static void mountPlayer(int id) {
+        if (!VehicleTeleport.unmountedPlayers.containsKey(id)) {
+            assert false;
+            TechnoEnderling.LOGGER.warn(MessageFormat.format("sent a {0} request but the server didn't expect it", ModNetworking.MOUNTING_READY.toString()));
+            return;
+        }
+        VehicleTeleport.unmountedPlayers.get(id).depthFirstSearch((parent, child) -> child.startRiding(parent, true));
+        VehicleTeleport.unmountedPlayers.remove(id);
     }
 
     public static float getYawDirection(double x, double z, BlockPos portalPos) {

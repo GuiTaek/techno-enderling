@@ -1,17 +1,28 @@
 package com.gmail.guitaekm.technoenderling.blocks;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
 public class TreeTraverser<T> {
-    List<TreeTraverser<T>> childs;
-    T vertex;
+    private List<TreeTraverser<T>> childs;
+    private T vertex;
 
     protected TreeTraverser(T vertex, List<TreeTraverser<T>> childs) {
         this.childs = childs;
         this.vertex = vertex;
+    }
+
+    public T getVertex() {
+        return vertex;
+    }
+
+    public TreeTraverser<T> addChild(T vertex) {
+        TreeTraverser<T> child = new TreeTraverser<>(vertex, new ArrayList<>());
+        this.childs.add(child);
+        return child;
     }
 
     public static <T> TreeTraverser<T> parseVertex(
@@ -38,5 +49,13 @@ public class TreeTraverser<T> {
             child.depthFirstSearch(consumeRelations);
             consumeRelations.accept(this.vertex, child.vertex);
         }
+    }
+
+    public <R> TreeTraverser<R> map(Function<T, R> func) {
+        List<TreeTraverser<R>> childs = this.childs.stream().map(
+                (TreeTraverser<T> child) -> (child.map(func))
+        ).toList();
+
+        return new TreeTraverser<>(func.apply(this.vertex), childs);
     }
 }
