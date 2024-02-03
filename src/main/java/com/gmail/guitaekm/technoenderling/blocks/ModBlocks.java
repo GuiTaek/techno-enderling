@@ -3,9 +3,12 @@ package com.gmail.guitaekm.technoenderling.blocks;
 import com.gmail.guitaekm.technoenderling.TechnoEnderling;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.minecraft.block.*;
+import net.minecraft.entity.EntityType;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
+import net.minecraft.world.BlockView;
 
 public class ModBlocks {
     public static final Block INFUSED_GLOWSTONE = new Block(
@@ -52,6 +55,13 @@ public class ModBlocks {
             true,
             ModBlocks.INFUSED_GOLD_BLOCK
     );
+    public static final PocketPortalBlock POCKET_PORTAL_BLOCK = new PocketPortalBlock(
+            FabricBlockSettings
+                    .of(Material.STONE)
+                    .strength(-1.0F, 3600000.0F)
+                    .dropsNothing()
+                    .allowsSpawning((state, world, pos, type) -> false)
+    );
     public static void register() {
         Registry.register(
                 Registry.BLOCK,
@@ -78,8 +88,13 @@ public class ModBlocks {
                 new Identifier(TechnoEnderling.MOD_ID, "infused_gold_block"),
                 ModBlocks.INFUSED_GOLD_BLOCK
         );
-
+        Registry.register(
+                Registry.BLOCK,
+                new Identifier(TechnoEnderling.MOD_ID, "pocket_portal_block"),
+                ModBlocks.POCKET_PORTAL_BLOCK
+        );
         // removes information that will be outdated when the server stops but the game continue
         EnderworldPortalBlock.register();
+        PocketPortalBlock.register(ModBlocks.POCKET_PORTAL_BLOCK);
     }
 }

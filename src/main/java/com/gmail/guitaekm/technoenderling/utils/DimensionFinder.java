@@ -20,7 +20,7 @@ public class DimensionFinder {
             .getWorldRegistryKeys()
                 .stream()
                 .filter(
-                        (RegistryKey<World> registryKey) -> registryKey.getValue().equals(new Identifier("technoenderling", "enderworld"))
+                        (RegistryKey<World> registryKey) -> registryKey.getValue().equals(this.id)
                 )
                 .findFirst()
                 .get();

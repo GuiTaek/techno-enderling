@@ -8,6 +8,7 @@ import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
+import org.lwjgl.system.CallbackI;
 
 public class ModItems {
     public static final BlockItem ENDERWORLD_PORTAL_BLOCK_1 = new BlockItem(
@@ -28,6 +29,10 @@ public class ModItems {
     );
     public static final BlockItem INFUSED_GOLD_BLOCK = new BlockItem(
             ModBlocks.INFUSED_GOLD_BLOCK,
+            new FabricItemSettings().group(ItemGroup.TRANSPORTATION)
+    );
+    public static final BlockItem POCKET_PORTAL_BLOCK = new BlockItem(
+            ModBlocks.POCKET_PORTAL_BLOCK,
             new FabricItemSettings().group(ItemGroup.TRANSPORTATION)
     );
     public static void register() {
@@ -55,6 +60,11 @@ public class ModItems {
                 Registry.ITEM,
                 new Identifier(TechnoEnderling.MOD_ID, "infused_gold_block"),
                 ModItems.INFUSED_GOLD_BLOCK
+        );
+        Registry.register(
+                Registry.ITEM,
+                new Identifier(TechnoEnderling.MOD_ID, "pocket_portal_block"),
+                ModItems.POCKET_PORTAL_BLOCK
         );
     }
 }
