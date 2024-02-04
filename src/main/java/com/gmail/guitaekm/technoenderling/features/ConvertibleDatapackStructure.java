@@ -8,6 +8,7 @@ import net.minecraft.block.Block;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.tag.Tag;
+import net.minecraft.tag.TagManager;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3i;
@@ -16,6 +17,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.text.MessageFormat;
 import java.util.*;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 
 public class ConvertibleDatapackStructure {
@@ -67,8 +70,7 @@ public class ConvertibleDatapackStructure {
         }
         return result;
     }
-    protected static Vec3i parseSize(JsonArray arr) {
-        JsonArray yArr = arr;
+    protected static Vec3i parseSize(JsonArray yArr) {
         JsonArray xArr = yArr.get(0).getAsJsonArray();
         JsonArray zArr = xArr.get(0).getAsJsonArray();
         return new Vec3i(xArr.size(), yArr.size(), zArr.size());
@@ -109,41 +111,39 @@ public class ConvertibleDatapackStructure {
         Registry.BLOCK.get(new Identifier(out[0], out[1]));
     }
     protected static <R> R doIfBlockElse(
-            ServerWorld world,
-            BlockPos pos,
+            TagManager tagManager,
             String value,
-            StructureIter.IterCallback<Block, R> ifBlock,
-            StructureIter.IterCallback<Tag<Block>, R> ifTag,
-            StructureIter.IterCallback<Void, R> ifEmpty
+            Function<Block, R> ifBlock,
+            Function<Tag<Block>, R> ifTag,
+            Supplier<R> ifEmpty
     ) {
         value = value.strip();
         if (value.isEmpty()) {
-            return ifEmpty.map(pos, null);
+            return ifEmpty.get();
         }
         String[] out = value.split(":");
         if (out.length != 2) {
             throw new IllegalArgumentException("Expects for the blocks two names, separated by a colon");
         }
         if (out[0].charAt(0) == '#') {
-            return ifTag.map(pos, world
-                    .getTagManager()
-                    .getTag(
+            return ifTag.apply(
+                    tagManager.getTag(
                             Registry.BLOCK_KEY,
                             new Identifier(out[0].substring(1), out[1]),
                             id -> new NoTagKnownException(id.toString())
-                    ));
+                    )
+            );
         }
-        return ifBlock.map(pos, Registry.BLOCK.get(new Identifier(out[0], out[1])));
+        return ifBlock.apply(Registry.BLOCK.get(new Identifier(out[0], out[1])));
     }
     protected static boolean checkBlock(ServerWorld server, BlockPos pos, String toCheck) {
         // empty strings won't replace existing Blocks
         return ConvertibleDatapackStructure.doIfBlockElse(
-                server,
-                pos,
+                server.getTagManager(),
                 toCheck,
-                (toCheckPos, block) -> server.getBlockState(toCheckPos).getBlock() == block,
-                (position, tag) -> tag.contains(server.getBlockState(position).getBlock()),
-                (position, value) -> true
+                (block) -> server.getBlockState(pos).getBlock() == block,
+                (tag) -> tag.contains(server.getBlockState(pos).getBlock()),
+                () -> true
         );
     }
 
@@ -158,7 +158,6 @@ public class ConvertibleDatapackStructure {
         this.lazyInit(server.getServer());
         assert this.structure != null;
         pos = pos.add(offset);
-        ListIterator<List<List<String>>> layerIter = this.structure.listIterator();
         return StructureIter.iterStructureList(
                 this.structure,
                 pos,
@@ -166,6 +165,7 @@ public class ConvertibleDatapackStructure {
         ).stream().filter((Boolean res) -> !res).findFirst().isEmpty();
     }
     public Vec3i size() {
+        assert this.structure != null;
         int y = this.structure.size();
         int x = this.structure.get(0).size();
         int z = this.structure.get(0).get(0).size();
@@ -182,8 +182,6 @@ public class ConvertibleDatapackStructure {
         Collections.shuffle(this.offsets, server.toServerWorld().getRandom());
         for(Vec3i offset : this.offsets) {
             if (this.checkStructureOnPos(server, pos, offset)) {
-                Vec3i resOffset = offset.subtract(new Vec3i(this.size().getX() - 1, this.size().getY(), this.size().getZ()));
-
                 return Optional.of(pos.add(offset));
             }
         }
@@ -197,18 +195,17 @@ public class ConvertibleDatapackStructure {
                 pos,
                 (position, value) -> {
                     ConvertibleDatapackStructure.doIfBlockElse(
-                            world,
-                            position,
+                            world.getTagManager(),
                             value,
-                            (position1, value1) -> {
-                                world.setBlockState(position1, value1.getDefaultState(), flags);
+                            (block) -> {
+                                world.setBlockState(position, block.getDefaultState(), flags);
                                 return null;
                             },
-                            (position12, value12) -> {
-                                world.setBlockState(position12, value12.getRandom(world.getRandom()).getDefaultState(), flags);
+                            (tag) -> {
+                                world.setBlockState(position, tag.getRandom(world.getRandom()).getDefaultState(), flags);
                                 return null;
                             },
-                            (StructureIter.IterCallback<Void, Void>) (position13, value13) -> null
+                            () -> null
                     );
                     return null;
                 }
