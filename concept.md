@@ -45,7 +45,7 @@ that you spawned in when entering a one-way-portal)
 - [ ] can't be destroyed in survival (maybe because it's out of bedrock)
 - [ ] very big
 - [ ] can be accessed through boats and minecarts
-- [ ] a Techno Enderling can repair a broken pocket portal no matter the blocks (because you can in fact destroy bedrock, even if I'm not a fan of this mechanic, I'm not going to fix it)
+- [ ] a Techno Enderling can repair a broken pocket portal with dragon immune blocks (because you can in fact destroy bedrock, even if I'm not a fan of this mechanic, I'm not going to fix it)
 - [ ] are meant to be a little bit difficult to find (a few minutes)
 - [ ] in an enderworld foggy forest it shall be easy to find one, even with the fog
 - [ ] this helps to make it possible for potato pcs possibly needing a render distance of 5
