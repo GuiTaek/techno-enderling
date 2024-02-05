@@ -9,6 +9,7 @@ import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.NotImplementedException;
 
+@Deprecated
 public class DimensionFinder {
     final protected Identifier id;
     protected RegistryKey<World> registryKey;
