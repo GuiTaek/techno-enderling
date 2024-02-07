@@ -10,89 +10,40 @@
         {
           "biome": "technoenderling:enderworld_wastes",
           "parameters": {
-            "continentalness": 0,
-            "depth": 0,
-            "erosion": 0,
             "temperature": 0,
             "humidity": 0,
+            "continentalness": 0,
+            "erosion": 0,
             "weirdness": 0,
+            "depth": 0,
+            "offset": 0
+          }
+        },
+        {
+          "biome": "technoenderling:enderworld_foggy_forest",
+          "parameters": {
+            "temperature": 0,
+            "humidity": 0,
+            "continentalness": 0,
+            "erosion": 0,
+            "weirdness": 0.6,
+            "depth": 0,
             "offset": 0
           }
         },
         {
           "biome": "technoenderling:enderworld_forest",
           "parameters": {
+            "temperature": 0,
+            "humidity": 0,
             "continentalness": 0,
-            "depth": 0,
             "erosion": 0,
-            "temperature": -0.3,
-            "humidity": 0.25,
-            "weirdness": 0.1,
-            "offset": 0.8
-          }
-        },
-        {
-          "biome": "technoenderling:enderworld_foggy_forest",
-          "parameters": {
-            "continentalness": 0,
+            "weirdness": 0.3,
             "depth": 0,
-            "erosion": 0,
-            "temperature": -0.8,
-            "humidity": 0.3,
-            "weirdness": 1,
-            "offset": 0.3
+            "offset": 0
           }
         }
-      ],
-      "altitude_noise": {
-        "firstOctave": -7,
-        "amplitudes": [
-          1.0,
-          1.0
-        ]
-      },
-      "humidity_noise": {
-        "firstOctave": -7,
-        "amplitudes": [
-          1.0,
-          1.0
-        ]
-      },
-      "temperature_noise": {
-        "firstOctave": -7,
-        "amplitudes": [
-          1.0,
-          1.0
-        ]
-      },
-      "weirdness_noise": {
-        "firstOctave": -7,
-        "amplitudes": [
-          1.0,
-          1.0
-        ]
-      },
-      "continentalness_noise": {
-        "firstOctave": -7,
-        "amplitudes": [
-          1.0,
-          1.0
-        ]
-      },
-      "depth_noise": {
-        "firstOctave": -7,
-        "amplitudes": [
-          1.0,
-          1.0
-        ]
-      },
-      "erosion_noise": {
-        "firstOctave": -7,
-        "amplitudes": [
-          1.0,
-          1.0
-        ]
-      }
+      ]
     }
   }
 }
