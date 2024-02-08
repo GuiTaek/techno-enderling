@@ -66,10 +66,12 @@ public class PocketPortalBlock extends Block implements HandleLongUseServer.List
                 return;
             }
             ((IServerPlayerEntityAccess) player).technoEnderling$setLastUsedPocketPortal(null);
+            // configure
+            int yOff = -4;
             VehicleTeleport.teleportWithVehicle(new TeleportParams(
                     player, info.enderworld, targetPos,
                     targetPos.getX() + 0.5,
-                    targetPos.getY() + 1.,
+                    targetPos.getY() + 1. + yOff,
                     targetPos.getZ() + 0.5
             ));
         } else if (player.getWorld().getRegistryKey().equals(info.enderworldKey)) {
