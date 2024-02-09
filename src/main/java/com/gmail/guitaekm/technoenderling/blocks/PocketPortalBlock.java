@@ -23,9 +23,25 @@ import net.minecraft.util.registry.Registry;
 import net.minecraft.world.gen.feature.StructureFeature;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public class PocketPortalBlock extends Block implements HandleLongUseServer.Listener {
+    // configure
+    public static Set<Vec3i> END_BRICKS_OFFSETS = Set.of(
+            new Vec3i(0, 1, 0),
+            new Vec3i(0, 2, 0),
+            new Vec3i(1, 3, 0),
+            new Vec3i(0, 3, 1),
+            new Vec3i(0, 3, -1),
+            new Vec3i(-1, 3, 0),
+            new Vec3i(0, 4, 0)
+    );
+
+    // configure
+    public static Vec3i CORE_OFFSET = new Vec3i(0, 3, 0);
+
     // configure
     public static double DROP_CHANCE = 0.8;
     public PocketPortalBlock(Settings settings) {
@@ -47,7 +63,7 @@ public class PocketPortalBlock extends Block implements HandleLongUseServer.List
         Structure pocketPortal = pocketPortalOptional.get();
         StructureFeature<?> commonPocketPortal = Registry
                 .STRUCTURE_FEATURE
-                .get(new Identifier(TechnoEnderling.MOD_ID, "rare_pocket_portal"));
+                .get(new Identifier(TechnoEnderling.MOD_ID, "common_pocket_portal"));
         StructureFeature<?> rarePocketPortal = Registry
                 .STRUCTURE_FEATURE
                 .get(new Identifier(TechnoEnderling.MOD_ID, "rare_pocket_portal"));
@@ -86,9 +102,15 @@ public class PocketPortalBlock extends Block implements HandleLongUseServer.List
      * @param ignoreLayers how many layers to be ignored from the bottom
      */
     public static void dropByPortalPlacement(ServerWorld destination, BlockPos position, Vec3i size, int ignoreLayers, ServerPlayerEntity player) {
+        // configure
+        Vec3i pocketPortalOffset = new Vec3i(-3, -5, -3);
         for (int x = 0; x < size.getX(); x++) {
             for (int y = ignoreLayers; y < size.getY(); y++) {
                 for (int z = 0; z < size.getZ(); z++) {
+                    Vec3i toPortalBlockOffset = new Vec3i(x, y, z).add(pocketPortalOffset).add(0, 1, 0);
+                    if (END_BRICKS_OFFSETS.contains(toPortalBlockOffset) || CORE_OFFSET.equals(toPortalBlockOffset)) {
+                        continue;
+                    }
                     BlockPos toDestroy = position.add(x, y, z);
                     // somehow this needs a chunk, not the server world
                     BlockEntity blockEntity = destination.getChunk(toDestroy).getBlockEntity(toDestroy);
@@ -197,32 +219,23 @@ public class PocketPortalBlock extends Block implements HandleLongUseServer.List
      * @return the dimensions the pocket portal should have, but only the radiusses
      */
     public Vec3i getPocketDimensionDimensions(ServerWorld pocketDimension, BlockPos portalPos) {
-        int[][] END_BRICKS_OFFSETS = {
-                {0, 1, 0},
-                {0, 2, 0},
-                {1, 3, 0},
-                {0, 3, 1},
-                {0, 3, -1},
-                {-1, 3, 0},
-                {0, 4, 0}
-        };
-        int[] CORE_OFFSET = {0, 3, 0};
-        if (Arrays.stream(END_BRICKS_OFFSETS).filter(offset -> (
+        List<Vec3i> notFittingBlocks = END_BRICKS_OFFSETS.stream().filter(offset -> (
                 pocketDimension
-                    .getBlockState(portalPos.add(offset[0], offset[1], offset[2]))
-                    .getBlock()
-                    != Blocks.END_STONE_BRICKS
-        )).toList().isEmpty()) {
+                        .getBlockState(portalPos.add(offset.getX(), offset.getY(), offset.getZ()))
+                        .getBlock()
+                        != Blocks.END_STONE_BRICKS
+        )).toList();
+        if (!notFittingBlocks.isEmpty()) {
             return new Vec3i(0, 0, 0);
         }
-        Block toCheck = pocketDimension.getBlockState(portalPos.add(CORE_OFFSET[0], CORE_OFFSET[1], CORE_OFFSET[2])).getBlock();
+        Block toCheck = pocketDimension.getBlockState(portalPos.add(CORE_OFFSET.getX(), CORE_OFFSET.getY(), CORE_OFFSET.getZ())).getBlock();
         if (toCheck == Blocks.IRON_BLOCK) {
             return new Vec3i(4, 2, 4);
         }
         if (toCheck == Blocks.DIAMOND_BLOCK) {
             return new Vec3i(8, 4, 8);
         }
-        if (toCheck == Blocks.BEACON) {
+        if (toCheck == Blocks.BEACON || toCheck == Blocks.NETHERITE_BLOCK) {
             return new Vec3i(16, 8, 16);
         }
         return new Vec3i(0, 0, 0);
