@@ -1,8 +1,10 @@
 package com.gmail.guitaekm.technoenderling.worldgen.structures;
 
-import com.gmail.guitaekm.technoenderling.TechnoEnderling;
+import com.gmail.guitaekm.technoenderling.enderling_structure.EnderlingStructure;
+import com.gmail.guitaekm.technoenderling.event.EnderlingStructureEvents;
 import com.mojang.serialization.Codec;
-import com.gmail.guitaekm.technoenderling.worldgen.RegisterModStructures;
+import net.fabricmc.fabric.api.event.Event;
+import net.fabricmc.fabric.api.event.EventFactory;
 import net.minecraft.block.BlockState;
 import net.minecraft.structure.PoolStructurePiece;
 import net.minecraft.structure.PostPlacementProcessor;
@@ -13,17 +15,17 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.Heightmap;
+import net.minecraft.world.WorldAccess;
 import net.minecraft.world.gen.chunk.VerticalBlockSample;
 import net.minecraft.world.gen.feature.StructureFeature;
 import net.minecraft.world.gen.feature.StructurePoolFeatureConfig;
 
-import java.util.Optional;
+import java.util.*;
 
-public class PocketPortalStructure extends StructureFeature<StructurePoolFeatureConfig> {
-
-    public PocketPortalStructure(Codec<StructurePoolFeatureConfig> codec) {
+public class StandardStructure extends StructureFeature<StructurePoolFeatureConfig> {
+    public StandardStructure(Codec<StructurePoolFeatureConfig> codec, Identifier templatePoolId, Identifier onGenerateId) {
         // Create the pieces layout of the structure and give it to the game
-        super(codec, PocketPortalStructure::createPiecesGenerator, PostPlacementProcessor.EMPTY);
+        super(codec, context -> createPiecesGenerator(context, templatePoolId, onGenerateId), PostPlacementProcessor.EMPTY);
     }
 
 
@@ -74,11 +76,11 @@ public class PocketPortalStructure extends StructureFeature<StructurePoolFeature
         return topBlock.getFluidState().isEmpty(); //landHeight > 100;
     }
 
-    public static Optional<StructurePiecesGenerator<StructurePoolFeatureConfig>> createPiecesGenerator(StructureGeneratorFactory.Context<StructurePoolFeatureConfig> context) {
+    public static Optional<StructurePiecesGenerator<StructurePoolFeatureConfig>> createPiecesGenerator(StructureGeneratorFactory.Context<StructurePoolFeatureConfig> context, Identifier templatePoolId, Identifier onGenerateId) {
 
         // Check if the spot is valid for our structure. This is just as another method for cleanness.
         // Returning an empty optional tells the game to skip this spot as it will not generate the structure.
-        if (!PocketPortalStructure.isFeatureChunk(context)) {
+        if (!StandardStructure.isFeatureChunk(context)) {
             return Optional.empty();
         }
 
@@ -100,7 +102,7 @@ public class PocketPortalStructure extends StructureFeature<StructurePoolFeature
                 // This is why your pool files must be in "data/<modid>/worldgen/template_pool/<the path to the pool here>"
                 // because the game automatically will check in worldgen/template_pool for the pools.
                 () -> context.registryManager().get(Registry.STRUCTURE_POOL_KEY)
-                        .get(new Identifier(TechnoEnderling.MOD_ID, "pocket_portal")),
+                        .get(templatePoolId),
 
                 // How many pieces outward from center can a recursive jigsaw structure spawn.
                 // Our structure is only 1 piece outward and isn't recursive so any value of 1 or more doesn't change anything.
@@ -123,6 +125,7 @@ public class PocketPortalStructure extends StructureFeature<StructurePoolFeature
         );
 
         // Turns the chunk coordinates into actual coordinates we can use. (Gets center of that chunk)
+        // TODO: make it random
         BlockPos blockpos = context.chunkPos().getCenterAtY(0);
 
         Optional<StructurePiecesGenerator<StructurePoolFeatureConfig>> structurePiecesGenerator =
@@ -151,6 +154,13 @@ public class PocketPortalStructure extends StructureFeature<StructurePoolFeature
             // TechnoEnderling.LOGGER.info("Rundown House at " + blockpos);
         }
 
+        // author: GuiTaek
+        if (!EnderlingStructureEvents.ON_GENERATE.invoker().onGenerate(
+                new Random(context.seed()),
+                onGenerateId, blockpos
+        )) {
+            return Optional.empty();
+        }
         // Return the pieces generator that is now set up so that the game runs it when it needs to create the layout of structure pieces.
         return structurePiecesGenerator;
     }

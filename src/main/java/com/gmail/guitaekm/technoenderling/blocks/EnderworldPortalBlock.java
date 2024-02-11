@@ -1,13 +1,15 @@
 package com.gmail.guitaekm.technoenderling.blocks;
 
 import com.gmail.guitaekm.technoenderling.TechnoEnderling;
-import com.gmail.guitaekm.technoenderling.features.EnderlingStructure;
-import com.gmail.guitaekm.technoenderling.features.EnderlingStructureRegistry;
+import com.gmail.guitaekm.technoenderling.enderling_structure.EnderlingStructure;
+import com.gmail.guitaekm.technoenderling.enderling_structure.EnderlingStructureInitializer;
+import com.gmail.guitaekm.technoenderling.enderling_structure.LinkGeneratedEnderworldPortal;
 import com.gmail.guitaekm.technoenderling.networking.HandleLongUseServer;
 import com.gmail.guitaekm.technoenderling.point_of_interest.ModPointsOfInterest;
-import com.gmail.guitaekm.technoenderling.utils.DimensionFinder;
+import com.gmail.guitaekm.technoenderling.utils.ArbitraryStructure;
 import com.gmail.guitaekm.technoenderling.utils.TeleportParams;
 import com.gmail.guitaekm.technoenderling.utils.VehicleTeleport;
+import com.gmail.guitaekm.technoenderling.worldgen.ModWorlds;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -22,6 +24,7 @@ import net.minecraft.world.WorldAccess;
 import net.minecraft.world.border.WorldBorder;
 import net.minecraft.world.poi.PointOfInterest;
 import net.minecraft.world.poi.PointOfInterestStorage;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -29,93 +32,25 @@ import java.util.stream.Stream;
 
 public class EnderworldPortalBlock extends Block implements HandleLongUseServer.Listener {
     // configure
-    public static final int[][] RESPAWN_OFFSETS = new int[][] {
-            {1, -1, 0},
-            {0, -1, 1},
-            {-1, -1, 0},
-            {0, -1, -1},
-            {1, -1, 1},
-            {-1, -1, 1},
-            {-1, -1, -1},
-            {1, -1, -1},
-
+    public static final int[][] RESPAWN_LAYERS = {
+            {1, 1, 0},
+            {1, 1, 1},
+            {1, 2, 0},
             {1, 0, 0},
-            {0, 0, 1},
-            {-1, 0, 0},
-            {0, 0, -1},
-
-            {1, -2, 0},
-            {0, -2, 1},
-            {-1, -2, 0},
-            {0, -2, -1},
-
+            {1, 2, 1},
             {1, 0, 1},
-            {-1, 0, 1},
-            {-1, 0, -1},
-            {1, 0, -1},
-
-            {1, -2, 1},
-            {-1, -2, 1},
-            {-1, -2, -1},
-            {1, -2, -1},
-
-            {0, 1, 0}
-
+            {0, 3, 0}
     };
 
     // configure
-    public static final int[][] VEHICLE_RESPAWN_OFFSET = {
-            { 2, -1, -1},
-            { 2, -1,  0},
-            { 2, -1,  1},
-
-            { 1, -1,  2},
-            { 0, -1,  2},
-            {-1, -1,  2},
-
-            {-2, -1,  1},
-            {-2, -1,  0},
-            {-2, -1, -1},
-
-            {-1, -1, -2},
-            { 0, -1, -2},
-            { 1, -1,  2},
-
-
-            { 2,  0, -1},
+    public static final int[][] VEHICLE_RESPAWN_LAYERS = {
+            { 2, 1, 0},
+            { 2, 1, 1},
+            { 2,  2,  0},
+            { 2,  2,  1},
             { 2,  0,  0},
             { 2,  0,  1},
-
-            { 1,  0,  2},
-            { 0,  0,  2},
-            {-1,  0,  2},
-
-            {-2,  0,  1},
-            {-2,  0,  0},
-            {-2,  0, -1},
-
-            {-1,  0, -2},
-            { 0,  0, -2},
-            { 1,  0,  2},
-
-
-            { 2, -2, -1},
-            { 2, -2,  0},
-            { 2, -2,  1},
-
-            { 1, -2,  2},
-            { 0, -2,  2},
-            {-1, -2,  2},
-
-            {-2, -2,  1},
-            {-2, -2,  0},
-            {-2, -2, -1},
-
-            {-1, -2, -2},
-            { 0, -2, -2},
-            { 1, -2,  2},
-
-            {0, 1, 0}
+            { 0,  3,  0}
     };
     final public int index;
     final public boolean active;
@@ -125,10 +60,12 @@ public class EnderworldPortalBlock extends Block implements HandleLongUseServer.
         public ServerWorld enderworld;
         public int dimensionScaleInverse;
         public EnderlingStructure portal;
-        protected LazyInformation(ServerWorld enderworld, int dimensionScaleInverse, EnderlingStructure portal) {
+        public ArbitraryStructure portalGenerated;
+        protected LazyInformation(ServerWorld enderworld, int dimensionScaleInverse, EnderlingStructure portal, ArbitraryStructure portalGenerated) {
             this.enderworld = enderworld;
             this.dimensionScaleInverse = dimensionScaleInverse;
             this.portal = portal;
+            this.portalGenerated = portalGenerated;
         }
     }
     protected static @Nullable LazyInformation info;
@@ -137,22 +74,20 @@ public class EnderworldPortalBlock extends Block implements HandleLongUseServer.
         if (EnderworldPortalBlock.info != null) {
             return info;
         }
-        DimensionFinder enderworldFinder = new DimensionFinder(
-                new Identifier(TechnoEnderling.MOD_ID, "enderworld")
-        );
-        enderworldFinder.lazyInit(server);
-        ServerWorld enderworld = server.getWorld(enderworldFinder.get());
+        ServerWorld enderworld = ModWorlds.getInfo(server).enderworld();
         assert enderworld != null;
         assert enderworld.getDimension() != null;
         int dimensionScaleInverse = (int) Math.round(1D / enderworld.getDimension().getCoordinateScale());
 
         // the reason this is here is, because I want, that the EnderlingStructureRegistry is ready
-        Optional<EnderlingStructure> portalOptional = EnderlingStructureRegistry
-                .instance()
+        EnderlingStructure portal = EnderlingStructureInitializer
+                .enderlingStructureRegistry
                 .get(new Identifier(TechnoEnderling.MOD_ID, "enderworld_portal"));
-        assert portalOptional.isPresent();
-        EnderlingStructure portal = portalOptional.get();
-        EnderworldPortalBlock.info = new LazyInformation(enderworld, dimensionScaleInverse, portal);
+        ArbitraryStructure portalGenerated = EnderlingStructureInitializer
+                .arbitraryStructureRegistry
+                .get(new Identifier(TechnoEnderling.MOD_ID, "enderworld_portal_generated"));
+        assert portal != null;
+        EnderworldPortalBlock.info = new LazyInformation(enderworld, dimensionScaleInverse, portal, portalGenerated);
         return EnderworldPortalBlock.info;
     }
 
@@ -182,6 +117,17 @@ public class EnderworldPortalBlock extends Block implements HandleLongUseServer.
         if(!((EnderworldPortalBlock)player.getWorld().getBlockState(pos).getBlock()).active) {
             return;
         }
+        if(player.getWorld().getBlockState(pos).get(GENERATED)) {
+            LinkGeneratedEnderworldPortal.generateOtherPortal(server, info.portal.placeable(), pos);
+            Optional<BlockPos> portalPosOptional = info.portalGenerated.check(player.getWorld(), pos);
+            if (portalPosOptional.isEmpty()) {
+                TechnoEnderling.LOGGER.warn("Invalid portal block found. Invalidating it");
+                player.getWorld().setBlockState(pos, this.unactiveCounterpart.getDefaultState());
+                return;
+            }
+            BlockPos portalPos = portalPosOptional.get();
+            info.portal.placeable().place(player.getWorld(), portalPos, new Vec3i(0, 0, 0), Block.NOTIFY_LISTENERS | Block.FORCE_STATE);
+        }
         if (player.getWorld().getRegistryKey().getValue().toString().equals("technoenderling:enderworld")) {
             ServerWorld destination = server.getOverworld();
             List<BlockPos> portalStream = EnderworldPortalBlock.findPortalPosToOverworld(server, pos).toList();
@@ -200,6 +146,69 @@ public class EnderworldPortalBlock extends Block implements HandleLongUseServer.
             VehicleTeleport.teleportWithVehicle(params);
         }
     }
+    public record Rotation(boolean signFirst, boolean signSecond, boolean switched) { }
+    public static int[][] getOffsets(long seed, int x, int z, boolean vehicle) {
+        int[][] layers = vehicle ? EnderworldPortalBlock.VEHICLE_RESPAWN_LAYERS : EnderworldPortalBlock.RESPAWN_LAYERS;
+        // this doesn't need configure, because this is a mathematical property of 3-dim space
+        List<Rotation> rotations = getAllPossibleRotations();
+        List<Vec3i> result = new ArrayList<>();
+        Random random = new Random(seed ^ x ^ z);
+        for (int[] layer : layers) {
+            Collections.shuffle(rotations, random);
+            for (Rotation rotation : rotations) {
+                int newX = layer[0];
+                int newY = layer[1];
+                int newZ = layer[2];
+                if (!rotation.signFirst) {
+                    if (newX == 0) {
+                        // these would be taken two times
+                        continue;
+                    }
+                    newX = -newX;
+                }
+                if (!rotation.signSecond) {
+                    if (newZ == 0) {
+                        // these would be taken two times
+                        continue;
+                    }
+                    newZ = -newZ;
+                }
+                if (rotation.switched) {
+                    int temp = newZ;
+                    newZ = newX;
+                    newX = temp;
+                }
+                Vec3i toAdd = new Vec3i(newX, newY, newZ);
+                if (!result.contains(toAdd)) {
+                    result.add(toAdd);
+                }
+            }
+        }
+        // from https://stackoverflow.com/a/372134/3289974
+        int[][] resultIntArray = new int[result.size()][];
+        for (int i = 0; i < result.size(); i++) {
+            Vec3i off = result.get(i);
+            resultIntArray[i] = new int[] {off.getX(), off.getY(), off.getZ()};
+        }
+        return resultIntArray;
+    }
+
+    @NotNull
+    private static List<Rotation> getAllPossibleRotations() {
+        List<Rotation> rotations = new ArrayList<>();
+        for (int signFirstInt = 0; signFirstInt < 2; signFirstInt++) {
+            for (int signSecondInt = 0; signSecondInt < 2; signSecondInt++) {
+                for (int switchedInt = 0; switchedInt < 2; switchedInt++) {
+                    rotations.add(new Rotation(
+                            signFirstInt == 1,
+                            signSecondInt == 1,
+                            switchedInt == 1
+                    ));
+                }
+            }
+        }
+        return rotations;
+    }
 
     public static @Nullable TeleportParams getTeleportParamsWithTargetPortalPositions(
             MinecraftServer server,
@@ -208,14 +217,12 @@ public class EnderworldPortalBlock extends Block implements HandleLongUseServer.
             List<BlockPos> portalPositions,
             BlockPos oldPortalPos
     ) {
-        int[][] offsets = player.hasVehicle() ? EnderworldPortalBlock.VEHICLE_RESPAWN_OFFSET : EnderworldPortalBlock.RESPAWN_OFFSETS;
         Optional<BlockPos> chosenPortal = EnderworldPortalBlock.getValidPortal(
             portalPositions,
             server,
             destination,
             player,
-            oldPortalPos.getY(),
-            offsets
+            oldPortalPos.getY()
         );
         if (chosenPortal.isEmpty()) {
             return null;
@@ -224,7 +231,12 @@ public class EnderworldPortalBlock extends Block implements HandleLongUseServer.
                 player,
                 destination,
                 chosenPortal.get(),
-                offsets,
+                EnderworldPortalBlock.getOffsets(
+                        destination.getSeed(),
+                        chosenPortal.get().getX(),
+                        chosenPortal.get().getZ(),
+                        player.hasVehicle()
+                ),
                 false
         );
         // as this was checked inside getSpawnPositionFromStream, this should never happen
@@ -320,18 +332,15 @@ public class EnderworldPortalBlock extends Block implements HandleLongUseServer.
             MinecraftServer server,
             ServerWorld destination,
             ServerPlayerEntity player,
-            int yToFind,
-            int[][] offsets
+            int yToFind
     ) {
         LazyInformation info = EnderworldPortalBlock.getInfo(server);
         WorldBorder worldBorder = destination.getWorldBorder();
-        info.portal.getConvertible().lazyInit(server);
-        List<Vec3i> convertibleOffsets = info.portal.getConvertible().getOffsets();
-        assert convertibleOffsets != null;
         return possiblePortals.stream()
                 .filter(filterPos -> info.portal
-                        .getPlaceable()
-                        .checkStructureOnPos(destination, filterPos, convertibleOffsets).isPresent()
+                        .placeable()
+                        .check(destination, filterPos)
+                        .isPresent()
                 )
                 .filter(worldBorder::contains)
                 .sorted(new Comparator<BlockPos>() {
@@ -346,26 +355,42 @@ public class EnderworldPortalBlock extends Block implements HandleLongUseServer.
                         player,
                         destination,
                         filterPortalBlockedPos,
-                        offsets,
+                        EnderworldPortalBlock.getOffsets(
+                                destination.getSeed(),
+                                filterPortalBlockedPos.getX(),
+                                filterPortalBlockedPos.getZ(),
+                                player.hasVehicle()
+                        ),
                         false
                 ).isPresent())
                 .findFirst();
 
     }
 
+    // this isn't deprecated in later versions, so you can ignore it
+    @SuppressWarnings("deprecation")
     @Override
     public BlockState getStateForNeighborUpdate(BlockState state, Direction direction, BlockState neighborState, WorldAccess world, BlockPos pos, BlockPos neighborPos) {
         if (world.isClient()) {
             return super.getStateForNeighborUpdate(state, direction, neighborState, world, pos, neighborPos);
         }
-        LazyInformation info = EnderworldPortalBlock.getInfo(world.getServer());
-        if (info.portal.getPlaceable().checkStructureOnPos(
-                world,
-                pos,
-                info.portal.getPlaceable().getAllAvailableOffsets()
-                ).isEmpty()
-        ) {
-            return this.unactiveCounterpart.getDefaultState();
+        // can't use getInfo() because sometimes, this method is called on server starting leading to rare
+        // crashes
+        EnderlingStructure portal = EnderlingStructureInitializer
+                .enderlingStructureRegistry
+                .get(new Identifier(TechnoEnderling.MOD_ID, "enderworld_portal"));
+        ArbitraryStructure portalGenerated = EnderlingStructureInitializer
+                .arbitraryStructureRegistry
+                .get(new Identifier(TechnoEnderling.MOD_ID, "enderworld_portal_generated"));
+
+        if (state.get(EnderworldPortalBlock.GENERATED)) {
+            if (portalGenerated.check(world, pos).isEmpty()) {
+                return this.unactiveCounterpart.getDefaultState();
+            }
+        } else {
+            if (portal.placeable().check(world, pos).isEmpty()) {
+                return this.unactiveCounterpart.getDefaultState();
+            }
         }
         return super.getStateForNeighborUpdate(state, direction, neighborState, world, pos, neighborPos);
     }

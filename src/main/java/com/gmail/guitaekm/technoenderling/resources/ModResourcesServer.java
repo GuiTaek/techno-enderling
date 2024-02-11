@@ -7,6 +7,5 @@ import net.fabricmc.api.Environment;
 public class ModResourcesServer {
     public static void registerResources() {
         FogDatapackLoader.register();
-        EnderlingStructureDatapackLoader.register();
     }
 }

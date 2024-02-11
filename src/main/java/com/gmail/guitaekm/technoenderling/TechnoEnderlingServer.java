@@ -1,8 +1,7 @@
 package com.gmail.guitaekm.technoenderling;
 
 import com.gmail.guitaekm.technoenderling.blocks.ModBlocks;
-import com.gmail.guitaekm.technoenderling.features.EnderlingStructureRegistry;
-import com.gmail.guitaekm.technoenderling.features.ModFeatures;
+import com.gmail.guitaekm.technoenderling.enderling_structure.EnderlingStructureInitializer;
 import com.gmail.guitaekm.technoenderling.items.ModItems;
 import com.gmail.guitaekm.technoenderling.point_of_interest.ModPointsOfInterest;
 import com.gmail.guitaekm.technoenderling.resources.ModResourcesServer;
@@ -20,10 +19,11 @@ public class TechnoEnderlingServer implements DedicatedServerModInitializer {
 		ModEventsServer.registerEvents();
 		ModResourcesServer.registerResources();
 		ModNetworking.registerNetworkingServer();
-		EnderlingStructureRegistry.registerClass();
+		// EnderlingStructureRegistry.registerClass();
 		ModPointsOfInterest.registerClass();
-		ModFeatures.register();
+		//ModFeatures.register();
 		VehicleTeleport.register();
 		RegisterModStructures.register();
+		EnderlingStructureInitializer.register();
 	}
 }
