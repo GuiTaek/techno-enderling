@@ -19,9 +19,7 @@ public class TechnoEnderlingServer implements DedicatedServerModInitializer {
 		ModEventsServer.registerEvents();
 		ModResourcesServer.registerResources();
 		ModNetworking.registerNetworkingServer();
-		// EnderlingStructureRegistry.registerClass();
 		ModPointsOfInterest.registerClass();
-		//ModFeatures.register();
 		VehicleTeleport.register();
 		RegisterModStructures.register();
 		EnderlingStructureInitializer.register();
