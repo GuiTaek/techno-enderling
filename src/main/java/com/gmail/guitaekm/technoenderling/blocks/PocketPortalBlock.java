@@ -196,6 +196,10 @@ public class PocketPortalBlock extends Block implements HandleLongUseServer.List
                         && -portalRadiusses.getZ() <= z && z <= portalRadiusses.getZ()
                             && y <= portalRadiusses.getY()
                     ) {
+                        if (pocketDimension.getBlockState(pos.add(x, y, z)).getBlock().equals(Blocks.BARRIER)) {
+                            // here, the pocket dimension is entered the first time
+                            pocketDimension.setBlockState(pos.add(x, y, z), Blocks.AIR.getDefaultState());
+                        }
                         continue;
                     }
                     pocketDimension.setBlockState(pos.add(x, y, z), Blocks.BARRIER.getDefaultState());

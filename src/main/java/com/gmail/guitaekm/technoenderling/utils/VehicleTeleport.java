@@ -14,6 +14,7 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ChunkTicketType;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.*;
 import net.minecraft.world.SpawnHelper;
@@ -71,7 +72,15 @@ public class VehicleTeleport {
         VehicleTeleport.unmountedPlayers.remove(id);
     }
 
-    public static float getYawDirection(double x, double z, BlockPos portalPos) {
+    public static float getYawDirection(long worldSeed, int x, int z, BlockPos portalPos) {
+        if (x == portalPos.getX() && z == portalPos.getZ()) {
+            long resultSeed = worldSeed;
+            // square so there's no "diagonal" of same values
+            resultSeed += ((long) x) * x;
+            resultSeed += z;
+            Random random = new Random(resultSeed);
+            return random.nextInt(-2, 2) * 90;
+        }
         // scraped and modified from DrownedEntity.tick
         // weirdly enough this isn't part of a method in a central place
         int dx = (int) (portalPos.getX() - Math.floor(x));
@@ -82,7 +91,7 @@ public class VehicleTeleport {
     }
 
     protected static Entity teleportUnmountedEntity(Entity entity, ServerWorld targetWorld, BlockPos portalPos, double x, double y, double z) {
-        float yaw = getYawDirection(x, z, portalPos);
+        float yaw = getYawDirection(targetWorld.getSeed(), (int)x, (int)z, portalPos);
 
         if (entity instanceof ServerPlayerEntity player) {
             player.teleport(targetWorld, x, y, z, yaw, +0);

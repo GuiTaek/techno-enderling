@@ -1,11 +1,11 @@
-package com.gmail.guitaekm.technoenderling.event;
+package com.gmail.guitaekm.technoenderling.enderling_structure;
 
 import com.gmail.guitaekm.technoenderling.TechnoEnderling;
 import com.gmail.guitaekm.technoenderling.blocks.EnderworldPortalBlock;
-import com.gmail.guitaekm.technoenderling.features.EnderlingStructure;
+import com.gmail.guitaekm.technoenderling.event.EnderlingStructureEvents;
 import com.gmail.guitaekm.technoenderling.items.ModItems;
-import com.gmail.guitaekm.technoenderling.utils.DimensionFinder;
 import com.gmail.guitaekm.technoenderling.utils.TeleportParams;
+import com.gmail.guitaekm.technoenderling.worldgen.ModWorlds;
 import com.google.common.collect.Sets;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -14,41 +14,34 @@ import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.ActionResult;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.*;
 import net.minecraft.world.WorldAccess;
-import org.apache.logging.log4j.core.jmx.Server;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-public class LinkEnderworldPortals implements OnStructureActivate.Listener {
-    final static private LinkEnderworldPortals instance = new LinkEnderworldPortals();
-    public static LinkEnderworldPortals getInstance() {
-        return LinkEnderworldPortals.instance;
-    }
-    public void registerClass() {
-        OnStructureActivate.getInstance().register(this);
-    }
-    @Override
-    public ActionResult onStructureActivate(ServerPlayerEntity player, ServerWorld world, EnderlingStructure portal, BlockPos root) {
-        return LinkEnderworldPortals.placePortal(player, world, portal, root);
+public class LinkEnderworldPortals implements EnderlingStructureEvents.OnConvertListener {
+    public void register() {
+        EnderlingStructureEvents.ON_CONVERT.register(this);
     }
 
-    public static ActionResult placePortal (ServerPlayerEntity player, ServerWorld world, EnderlingStructure portal, BlockPos root) {
-        if (!portal.getId().equals(new Identifier(TechnoEnderling.MOD_ID, "enderworld_portal"))) {
-            return ActionResult.PASS;
+    @Override
+    public boolean onConvert(ServerPlayerEntity player, ServerWorld world, Identifier portalId, EnderlingStructure portal, BlockPos root) {
+        return LinkEnderworldPortals.placePortal(player, world, portalId, portal, root);
+    }
+
+    public static boolean placePortal (ServerPlayerEntity player, ServerWorld world, Identifier portalId, EnderlingStructure portal, BlockPos root) {
+        if (!portalId.equals(new Identifier(TechnoEnderling.MOD_ID, "enderworld_portal"))) {
+            return true;
         }
-        ServerWorld otherWorld, enderworld;
+        MinecraftServer server = player.getServer();
+        assert server != null;
+        ServerWorld otherWorld, enderworld = ModWorlds.getInfo(server).enderworld();
         Optional<BlockPos> otherRoot;
-        DimensionFinder finder = new DimensionFinder(new Identifier(TechnoEnderling.MOD_ID, "enderworld"));
-        finder.lazyInit(world.getServer());
-        enderworld = world.getServer().getWorld(
-                finder.get()
-        );
         assert enderworld != null;
         if (world.equals(world.getServer().getOverworld())) {
             otherWorld = enderworld;
@@ -57,17 +50,17 @@ public class LinkEnderworldPortals implements OnStructureActivate.Listener {
             otherWorld = world.getServer().getOverworld();
             otherRoot = LinkEnderworldPortals.findPortalSpawnOverworld(player, otherWorld, root);
         } else {
-            return ActionResult.PASS;
+            return true;
         }
         if (otherRoot.isEmpty()) {
-            return ActionResult.PASS;
+            return true;
         }
         if (LinkEnderworldPortals.tryTakePortalItems(player)) {
             buildPlatformAndClearRoom(otherWorld, player, otherRoot.get());
-            portal.getPlaceable().generate(otherWorld, otherRoot.get());
-            return ActionResult.PASS;
+            portal.placeable().place(otherWorld, otherRoot.get().subtract(new Vec3i(0, 2, 0)), new Vec3i(0, 0, 0), Block.NOTIFY_LISTENERS | Block.FORCE_STATE);
+            return true;
         }
-        return ActionResult.FAIL;
+        return false;
     }
 
     public static BlockPos overworldToEnderworldRandom(WorldAccess enderworld, BlockPos overworldPos) {
@@ -86,7 +79,7 @@ public class LinkEnderworldPortals implements OnStructureActivate.Listener {
      * @param player the player who is trying to activate the portal
      * @param enderworld the enderworld dimension
      * @param overworldPos the position of the deactivated, placed portal in the overworld
-     * @return
+     * @return the position in the enderworld
      */
     public static Optional<BlockPos> findPortalSpawnEnderworld(
             ServerPlayerEntity player,
@@ -108,7 +101,7 @@ public class LinkEnderworldPortals implements OnStructureActivate.Listener {
      * @param player the player who is trying to activate the portal
      * @param overworld the overworld dimension
      * @param enderworldPos the position of the deactivated, placed portal in the enderworld
-     * @return
+     * @return the position of the portal in the overworld
      */
     public static Optional<BlockPos> findPortalSpawnOverworld(ServerPlayerEntity player, ServerWorld overworld, BlockPos enderworldPos) {
         List<BlockPos> possiblePortals = EnderworldPortalBlock.findPortalPosToOverworld(overworld.getServer(), enderworldPos).toList();
