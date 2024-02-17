@@ -1,0 +1,7 @@
+{
+  "config": {
+    "start_pool": "technoenderling:one_way_portal",
+    "size": 7
+  },
+  "type": "technoenderling:one_way_portal"
+}

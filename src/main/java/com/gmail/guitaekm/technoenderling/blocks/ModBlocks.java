@@ -62,6 +62,16 @@ public class ModBlocks {
                     .dropsNothing()
                     .allowsSpawning((state, world, pos, type) -> false)
     );
+    public static final OneWayPortal ONE_WAY_PORTAL_BLOCK = new OneWayPortal(
+            FabricBlockSettings
+                    .of(Material.GLASS)
+                    .strength(-1.0F, 3600000.0F)
+                    .dropsNothing()
+                    .allowsSpawning((state, world, pos, type) -> false)
+                    .blockVision((state, world, pos) -> false)
+                    .nonOpaque()
+
+    );
     public static void register() {
         Registry.register(
                 Registry.BLOCK,
@@ -93,8 +103,14 @@ public class ModBlocks {
                 new Identifier(TechnoEnderling.MOD_ID, "pocket_portal_block"),
                 ModBlocks.POCKET_PORTAL_BLOCK
         );
+        Registry.register(
+                Registry.BLOCK,
+                new Identifier(TechnoEnderling.MOD_ID, "one_way_portal_block"),
+                ModBlocks.ONE_WAY_PORTAL_BLOCK
+        );
         // removes information that will be outdated when the server stops but the game continue
         EnderworldPortalBlock.register();
         PocketPortalBlock.register(ModBlocks.POCKET_PORTAL_BLOCK);
+        ONE_WAY_PORTAL_BLOCK.registerServer();
     }
 }
