@@ -1,0 +1,7 @@
+{
+  "config": {
+    "start_pool": "technoenderling:enderman_enderworld",
+    "size": 7
+  },
+  "type": "technoenderling:enderman_enderworld"
+}

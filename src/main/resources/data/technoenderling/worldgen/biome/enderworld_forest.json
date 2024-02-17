@@ -33,19 +33,5 @@
     ]
   ],
   "spawn_costs": {},
-  "spawners": {
-    "ambient": [],
-    "misc": [],
-    "monster": [
-      {
-        "type": "minecraft:enderman",
-        "maxCount": 1,
-        "minCount": 1,
-        "weight": 1
-      }
-    ],
-    "underground_water_creature": [],
-    "water_ambient": [],
-    "water_creature": []
-  }
+  "spawners": {}
 }
