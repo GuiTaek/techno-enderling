@@ -18,11 +18,12 @@ public class RegisterGui {
     public static final ExtendedScreenHandlerType<TeleportScreenHandler> TELEPORT_SCREEN_HANDLER = new ExtendedScreenHandlerType<>(
             (int syncId, PlayerInventory inv, PacketByteBuf buf) -> {
                 TechnoEnderling.LOGGER.info("ignoring the packet");
-                EnderworldPortalBlock.NetherInstance source = new EnderworldPortalBlock.NetherInstance("home", new BlockPos(0, 64, 0));
+                EnderworldPortalBlock.NetherInstance source = new EnderworldPortalBlock.NetherInstance(0, "home", new BlockPos(0, 64, 0));
                 List<EnderworldPortalBlock.NetherInstance> registeredEnderworldPortalPositions = List.of(
-                        new EnderworldPortalBlock.NetherInstance(0, "10-64-0", new BlockPos(10, 64, 0)),
-                        new EnderworldPortalBlock.NetherInstance(1, "0-64-10", new BlockPos(0, 64, 10)),
-                                new EnderworldPortalBlock.NetherInstance(2, "10-64-10", new BlockPos(-10, 64, 10))
+                        new EnderworldPortalBlock.NetherInstance(1, "10-64-0", new BlockPos(10, 64, 0)),
+                        new EnderworldPortalBlock.NetherInstance(2, "0-64-10", new BlockPos(0, 64, 10)),
+                        new EnderworldPortalBlock.NetherInstance(3, "10-64-10", new BlockPos(-10, 64, 10)),
+                        source
                 );
                 return new TeleportScreenHandler(source, registeredEnderworldPortalPositions, syncId);
             }
