@@ -23,44 +23,45 @@ a human
 # enderworld
 - [x] by design only useful for Techno Enderlings
 - [x] is a new dimension, the origin of the Enderlings
-- [ ] extremly rarely, non-renewable and persistant endermans spawn there, but there are structures that make them spawn frequently and other mobs spawn
-- [ ] one-way-portals generate (else the overworld would get cluttered with
+- [x] extremly rarely, non-renewable and persistant endermans spawn there, but there are structures that make them spawn frequently and other mobs spawn
+- [x] one-way-portals generate (else the overworld would get cluttered with
 these portals when you're long enough in a world)
-- [ ] pocket-portals generate
+- [x] pocket-portals generate
 - [x] some endertrees generate (so you can make tools to break out of a stone-layer
 that you spawned in when entering a one-way-portal)
 - [x] to make tools of stone you have to go to the overworld by design
 - [ ] spawning in the enderworld, as it is less dense than the overworld, you are more spread out to spawn (because 21*16 = 336: 336x336)
 
 # pocket dimension
-- [ ] unique to every player
-- [ ] contains in the middle a pocket-portal
-- [ ] no mobs spawn naturally, you have to move every mob you want with a boat
+- [x] unique to every player
+- [x] contains in the middle a pocket-portal
+- [x] no mobs spawn naturally, you have to move every mob you want with a boat
 
 # non-buildable structures in the enderworld
 ## one-way-portals
-- [ ] teleports you to the surface (the trees are still needed to kill the endermans)
+- [x] teleports you to the surface (the trees are still needed to kill the endermans)
 ## pocket-portal
 - [ ] only a Techno Enderling can enter
-- [ ] can't be destroyed in survival (maybe because it's out of bedrock)
-- [ ] very big
-- [ ] can be accessed through boats and minecarts
+- [x] can't be destroyed in survival (maybe because it's out of bedrock)
+- [x] very big
+- [x] can be accessed through boats and minecarts
 - [ ] a Techno Enderling can repair a broken pocket portal with dragon immune blocks (because you can in fact destroy bedrock, even if I'm not a fan of this mechanic, I'm not going to fix it)
-- [ ] are meant to be a little bit difficult to find (a few minutes)
-- [ ] in an enderworld foggy forest it shall be easy to find one, even with the fog
-- [ ] this helps to make it possible for potato pcs possibly needing a render distance of 5
-- [ ] I'm planning to test these last two points in survival with a render distance of 5
-- [ ] destroys every block inside its bounding box on entering so you better don't build your storage inside the portal
-- [ ] from a destroyed inventory, only some items survive (not sure how to implement though)
+- [x] are meant to be a little bit difficult to find (a few minutes)
+- [x] in an enderworld foggy forest it shall be easy to find one, even with the fog
+- [x] this helps to make it possible for potato pcs possibly needing a render distance of 5
+- [x] I'm planning to test these last two points in survival with a render distance of 5
+- [x] destroys every block inside its bounding box on entering so you better don't build your storage inside the portal
+- [x] from a destroyed inventory, only some items survive
 ### pocket dimension
-- [ ] teleports the player to the last pocket portal the player used
+- [x] teleports the player to the last pocket portal the player used
 ### enderworld
-- [ ] teleports the player to its own pocket dimension
+- [x] teleports the player to its own pocket dimension
+- [ ] every player has its own pocket dimension
 # buildable structues
 ## portal
 - [x] every player can use it
 - [x] spawn naturally and activated in the overworld but nowhere else
-- [ ] when spawned naturally in the overworld, they automatically link to a portal on the surface of the enderworld
+- [x] when spawned naturally in the overworld, they automatically link to a portal on the surface of the enderworld
   - [x] it is meant to be easy to find one
 - [x] is build out of a glowstone block and two gold Blocks above, however not
 the raw blocks but blocks that have been made useless with ender essence. The glowstone
@@ -70,13 +71,13 @@ blocks drops raw glowstone dust
 ### enderworld
 - [x] lead to the overworld
 - [x] every block in the overworld corresponds to a chunk in the enderworld
-- [ ] the y coordinate is exact on building
+- [x] the y coordinate is exact on building
 - [x] consumes while activating 2 gold blocks and 1 glowstone block
 - [x] teleports to the nearest y-wise portal
 - [x] will break 3x3x3 blocks on activation on the other side (not when going through) and, if necessary, a plattform of endstone (that must be provided)
 ### overworld
 - [x] lead to the enderworld
-- [ ] the x,z coordinate is random in the chunk, the y coordinate is exact
+- [x] the x,z coordinate is random in the chunk, the y coordinate is exact
 - [x] consumes while activating 2 gold blocks and 1 glowstone block
 - [x] teleports to the nearest y-wise portal
 - [x] will break 3x3x3 blocks on activation on the other side (not when going through) and, if necessary, a plattform of different stone types (that must be provided)
