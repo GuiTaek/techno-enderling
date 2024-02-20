@@ -147,7 +147,6 @@ public class EnderworldPortalBlock extends Block implements HandleLongUseServer.
         if (player.getWorld().getRegistryKey().getValue().equals(
             new Identifier("minecraft:the_nether")
         )) {
-            ServerPlayNetworking.send(player, ModNetworking.SHOW_TELEPORT_SCREEN, PacketByteBufs.create());
             player.openHandledScreen(new TeleportScreenFactory());
             return;
         }
