@@ -4,22 +4,40 @@ import com.gmail.guitaekm.technoenderling.TechnoEnderling;
 import com.gmail.guitaekm.technoenderling.enderling_structure.EnderlingStructure;
 import com.gmail.guitaekm.technoenderling.enderling_structure.EnderlingStructureInitializer;
 import com.gmail.guitaekm.technoenderling.enderling_structure.LinkGeneratedEnderworldPortal;
+import com.gmail.guitaekm.technoenderling.gui.RegisterGui;
+import com.gmail.guitaekm.technoenderling.gui.TeleportScreenFactory;
+import com.gmail.guitaekm.technoenderling.gui.TeleportScreenHandler;
 import com.gmail.guitaekm.technoenderling.networking.HandleLongUseServer;
+import com.gmail.guitaekm.technoenderling.networking.ModNetworking;
 import com.gmail.guitaekm.technoenderling.point_of_interest.ModPointsOfInterest;
 import com.gmail.guitaekm.technoenderling.utils.ArbitraryStructure;
 import com.gmail.guitaekm.technoenderling.utils.TeleportParams;
 import com.gmail.guitaekm.technoenderling.utils.VehicleTeleport;
 import com.gmail.guitaekm.technoenderling.worldgen.ModWorlds;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.screen.MerchantScreenHandler;
+import net.minecraft.screen.NamedScreenHandlerFactory;
+import net.minecraft.screen.ScreenHandler;
+import net.minecraft.screen.SimpleNamedScreenHandlerFactory;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.*;
+import net.minecraft.util.registry.Registry;
+import net.minecraft.util.registry.RegistryKey;
+import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 import net.minecraft.world.border.WorldBorder;
 import net.minecraft.world.poi.PointOfInterest;
@@ -56,6 +74,12 @@ public class EnderworldPortalBlock extends Block implements HandleLongUseServer.
     final public boolean active;
     final public Block unactiveCounterpart;
     public static final BooleanProperty GENERATED = BooleanProperty.of("generated");
+
+    final static public List<Identifier> allowedDimensions = List.of(
+            new Identifier(TechnoEnderling.MOD_ID, "enderworld"),
+            new Identifier("minecraft:overworld"),
+            new Identifier("minecraft:the_nether")
+    );
     public static class LazyInformation {
         public ServerWorld enderworld;
         public int dimensionScaleInverse;
@@ -115,6 +139,16 @@ public class EnderworldPortalBlock extends Block implements HandleLongUseServer.
             return;
         }
         if(!((EnderworldPortalBlock)player.getWorld().getBlockState(pos).getBlock()).active) {
+            return;
+        }
+        if (!EnderworldPortalBlock.allowedDimensions.contains(player.getWorld().getRegistryKey().getValue())) {
+            return;
+        }
+        if (player.getWorld().getRegistryKey().getValue().equals(
+            new Identifier("minecraft:the_nether")
+        )) {
+            ServerPlayNetworking.send(player, ModNetworking.SHOW_TELEPORT_SCREEN, PacketByteBufs.create());
+            player.openHandledScreen(new TeleportScreenFactory());
             return;
         }
         if(player.getWorld().getBlockState(pos).get(GENERATED)) {

@@ -19,6 +19,8 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.*;
+import net.minecraft.util.registry.Registry;
+import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.WorldAccess;
 import org.jetbrains.annotations.Nullable;
 
@@ -31,6 +33,15 @@ public class LinkEnderworldPortals implements EnderlingStructureEvents.OnConvert
 
     @Override
     public boolean onConvert(ServerPlayerEntity player, ServerWorld world, Identifier portalId, EnderlingStructure portal, BlockPos root) {
+        if (!EnderworldPortalBlock.allowedDimensions.contains(world.getRegistryKey().getValue())) {
+            return false;
+        }
+        if (world.getRegistryKey().equals(RegistryKey.of(
+                Registry.WORLD_KEY,
+                new Identifier("minecraft", "the_nether")
+        ))) {
+            return true;
+        }
         return LinkEnderworldPortals.placePortal(player, world, portalId, portal, root);
     }
 
