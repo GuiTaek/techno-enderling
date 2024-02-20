@@ -42,19 +42,16 @@ import com.gmail.guitaekm.technoenderling.TechnoEnderling;
 import com.gmail.guitaekm.technoenderling.access.IMouseMixin;
 import com.gmail.guitaekm.technoenderling.blocks.EnderworldPortalBlock;
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.*;
-import net.minecraft.world.chunk.WorldChunk;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 
@@ -62,7 +59,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class TeleportScreen extends HandledScreen<TeleportScreenHandler> implements ClientChunkEvents.Load, WorldRenderEvents.DebugRender {
+public class TeleportScreen extends HandledScreen<TeleportScreenHandler> implements WorldRenderEvents.DebugRender {
     private static final Vector3f VECTOR_ZERO = new Vector3f(0, 0, 0);
     private @Nullable Matrix4f projectionViewMatrix;
     private @Nullable EnderworldPortalBlock.NetherInstance currentMouseOver;
@@ -70,7 +67,6 @@ public class TeleportScreen extends HandledScreen<TeleportScreenHandler> impleme
     private int selectionIndex = 0;
     public TeleportScreen(TeleportScreenHandler handler, PlayerInventory inventory, Text title) {
         super(handler, inventory, title);
-        ClientChunkEvents.CHUNK_LOAD.register(this);
         WorldRenderEvents.BEFORE_DEBUG_RENDER.register(this);
     }
 
@@ -245,7 +241,13 @@ public class TeleportScreen extends HandledScreen<TeleportScreenHandler> impleme
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (this.currentMouseOver != null) {
-            TechnoEnderling.LOGGER.info(this.currentMouseOver.toString());
+            if (this.handler.source == this.currentMouseOver) {
+                TechnoEnderling.LOGGER.info("todo: implement changing names");
+                MinecraftClient.getInstance().setScreen(null);
+                return true;
+            }
+            this.handler.requestTeleportClient(this.handler.registeredEnderworldPortalPositions.indexOf(this.currentMouseOver));
+            MinecraftClient.getInstance().setScreen(null);
             return true;
         }
         return super.mouseClicked(mouseX, mouseY, button);
@@ -265,13 +267,6 @@ public class TeleportScreen extends HandledScreen<TeleportScreenHandler> impleme
     public void updateMatrices(MatrixStack modelViewStack, Matrix4f projectionMatrix) {
         this.projectionViewMatrix = projectionMatrix.copy();
         this.projectionViewMatrix.multiply(modelViewStack.peek().getPositionMatrix());
-    }
-
-    private ClientWorld world = null;
-
-    @Override
-    public void onChunkLoad(ClientWorld world, WorldChunk chunk) {
-        this.world = world;
     }
 
     @Override
