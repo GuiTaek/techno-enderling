@@ -2,6 +2,7 @@
 // https://github.com/Ladysnake/Requiem/blob/1.19/src/main/java/ladysnake/requiem/common/screen/RiftScreenHandler.java
 package com.gmail.guitaekm.technoenderling.gui;
 
+import com.gmail.guitaekm.technoenderling.blocks.EnderworldPortalBlock;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.ScreenHandlerType;
@@ -13,8 +14,8 @@ import java.util.Set;
 
 public class TeleportScreenHandler extends ScreenHandler {
     public TeleportScreenHandler(
-            BlockPos source,
-            List<BlockPos> registeredEnderworldPortalPositions,
+            EnderworldPortalBlock.NetherInstance source,
+            List<EnderworldPortalBlock.NetherInstance> registeredEnderworldPortalPositions,
             int syncId
     ) {
         super(RegisterGui.TELEPORT_SCREEN_HANDLER, syncId);
@@ -22,8 +23,8 @@ public class TeleportScreenHandler extends ScreenHandler {
         this.registeredEnderworldPortalPositions = registeredEnderworldPortalPositions;
     }
 
-    public BlockPos source;
-    public List<BlockPos> registeredEnderworldPortalPositions;
+    public EnderworldPortalBlock.NetherInstance source;
+    public List<EnderworldPortalBlock.NetherInstance> registeredEnderworldPortalPositions;
 
     @Override
     public boolean canUse(PlayerEntity player) {

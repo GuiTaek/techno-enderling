@@ -428,4 +428,5 @@ public class EnderworldPortalBlock extends Block implements HandleLongUseServer.
         }
         return super.getStateForNeighborUpdate(state, direction, neighborState, world, pos, neighborPos);
     }
+    public record NetherInstance(int id, String name, BlockPos pos) { }
 }

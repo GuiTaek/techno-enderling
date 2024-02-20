@@ -40,6 +40,7 @@ package com.gmail.guitaekm.technoenderling.gui;
 
 import com.gmail.guitaekm.technoenderling.TechnoEnderling;
 import com.gmail.guitaekm.technoenderling.access.IMouseMixin;
+import com.gmail.guitaekm.technoenderling.blocks.EnderworldPortalBlock;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
@@ -64,7 +65,7 @@ import java.util.Objects;
 public class TeleportScreen extends HandledScreen<TeleportScreenHandler> implements ClientChunkEvents.Load, WorldRenderEvents.DebugRender {
     private static final Vector3f VECTOR_ZERO = new Vector3f(0, 0, 0);
     private @Nullable Matrix4f projectionViewMatrix;
-    private @Nullable BlockPos currentMouseOver;
+    private @Nullable EnderworldPortalBlock.NetherInstance currentMouseOver;
     private int overlappingSelections = 1;
     private int selectionIndex = 0;
     public TeleportScreen(TeleportScreenHandler handler, PlayerInventory inventory, Text title) {
@@ -96,11 +97,11 @@ public class TeleportScreen extends HandledScreen<TeleportScreenHandler> impleme
             int centerX = this.width / 2;
             int centerY = this.height / 2;
             this.currentMouseOver = null;
-            List<BlockPos> selected = new ArrayList<>();
+            List<EnderworldPortalBlock.NetherInstance> selected = new ArrayList<>();
             RenderSystem.setShaderTexture(0, new Identifier("minecraft:textures/block/dirt.png"));
 
-            for (BlockPos dest : this.handler.registeredEnderworldPortalPositions) {
-                Vec3d vec3dDest = new Vec3d(dest.getX(), dest.getY(), dest.getZ());
+            for (EnderworldPortalBlock.NetherInstance dest : this.handler.registeredEnderworldPortalPositions) {
+                Vec3d vec3dDest = new Vec3d(dest.pos().getX(), dest.pos().getY(), dest.pos().getZ());
                 Vector3f projected = worldToScreenSpace(this.projectionViewMatrix, vec3dDest);
                 int x, y;
 
@@ -171,7 +172,7 @@ public class TeleportScreen extends HandledScreen<TeleportScreenHandler> impleme
                 List<Text> lines = new ArrayList<>(selected.size());
 
                 for (int i = 0; i < selected.size(); i++) {
-                    BlockPos dest = selected.get(i);
+                    EnderworldPortalBlock.NetherInstance dest = selected.get(i);
                     Formatting formatting;
 
                     if (i == selectedIndex) {
@@ -181,7 +182,7 @@ public class TeleportScreen extends HandledScreen<TeleportScreenHandler> impleme
                         formatting = Formatting.GRAY;
                     }
 
-                    lines.add(Text.of("hihihi").copy().formatted(formatting));
+                    lines.add(Text.of(dest.name()).copy().formatted(formatting));
                 }
 
                 this.renderTooltip(matrices, lines, centerX, centerY);
