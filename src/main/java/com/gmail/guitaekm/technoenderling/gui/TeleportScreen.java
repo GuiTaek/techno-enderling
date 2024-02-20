@@ -153,15 +153,15 @@ public class TeleportScreen extends HandledScreen<TeleportScreenHandler> impleme
                 y = MathHelper.clamp(y, 0, height);
 
                 int v;
-                if (dest.equals(this.getScreenHandler().source)) {
-                    v = sourceObeliskV;
-                } else if (x > (centerX - iconHalfSize) && x < (centerX + iconHalfSize) && y > (centerY - iconHalfSize) && y < (centerY + iconHalfSize)) {
+                if (x > (centerX - iconHalfSize) && x < (centerX + iconHalfSize) && y > (centerY - iconHalfSize) && y < (centerY + iconHalfSize)) {
                     v = selectedObeliskV;
+                    selected.add(dest);
+                } else if (dest.equals(this.getScreenHandler().source)) {
+                    v = sourceObeliskV;
                     selected.add(dest);
                 } else {
                     v = obeliskV;
                 }
-
                 // actually the parameter names are wrong
                 drawTexture(matrices, x - iconHalfSize, y - iconHalfSize, this.getZOffset(), 0, v, iconSize, iconSize, textureWidth, textureHeight);
             }
