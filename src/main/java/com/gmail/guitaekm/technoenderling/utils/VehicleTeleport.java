@@ -91,7 +91,7 @@ public class VehicleTeleport {
     }
 
     protected static Entity teleportUnmountedEntity(Entity entity, ServerWorld targetWorld, BlockPos portalPos, double x, double y, double z) {
-        float yaw = getYawDirection(targetWorld.getSeed(), (int)x, (int)z, portalPos);
+        float yaw = getYawDirection(targetWorld.getSeed(), (int)Math.floor(x), (int)Math.floor(z), portalPos);
 
         if (entity instanceof ServerPlayerEntity player) {
             player.teleport(targetWorld, x, y, z, yaw, +0);
