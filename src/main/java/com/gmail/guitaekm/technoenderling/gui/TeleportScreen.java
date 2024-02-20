@@ -39,15 +39,21 @@
 package com.gmail.guitaekm.technoenderling.gui;
 
 import com.gmail.guitaekm.technoenderling.TechnoEnderling;
+import com.gmail.guitaekm.technoenderling.access.IMouseMixin;
 import com.mojang.blaze3d.systems.RenderSystem;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents;
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.*;
+import net.minecraft.world.chunk.WorldChunk;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 
@@ -55,7 +61,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class TeleportScreen extends HandledScreen<TeleportScreenHandler> {
+public class TeleportScreen extends HandledScreen<TeleportScreenHandler> implements ClientChunkEvents.Load, WorldRenderEvents.DebugRender {
     private static final Vector3f VECTOR_ZERO = new Vector3f(0, 0, 0);
     private @Nullable Matrix4f projectionViewMatrix;
     private @Nullable BlockPos currentMouseOver;
@@ -63,6 +69,8 @@ public class TeleportScreen extends HandledScreen<TeleportScreenHandler> {
     private int selectionIndex = 0;
     public TeleportScreen(TeleportScreenHandler handler, PlayerInventory inventory, Text title) {
         super(handler, inventory, title);
+        ClientChunkEvents.CHUNK_LOAD.register(this);
+        WorldRenderEvents.BEFORE_DEBUG_RENDER.register(this);
     }
 
     @Override
@@ -256,5 +264,23 @@ public class TeleportScreen extends HandledScreen<TeleportScreenHandler> {
     public void updateMatrices(MatrixStack modelViewStack, Matrix4f projectionMatrix) {
         this.projectionViewMatrix = projectionMatrix.copy();
         this.projectionViewMatrix.multiply(modelViewStack.peek().getPositionMatrix());
+    }
+
+    private ClientWorld world = null;
+
+    @Override
+    public void onChunkLoad(ClientWorld world, WorldChunk chunk) {
+        this.world = world;
+    }
+
+    @Override
+    public void beforeDebugRender(WorldRenderContext context) {
+        if(!(MinecraftClient.getInstance().currentScreen instanceof TeleportScreen)) {
+            return;
+        }
+        // temporarily here
+        ((IMouseMixin) MinecraftClient.getInstance().mouse).setKeepScreen();
+        MinecraftClient.getInstance().mouse.lockCursor();
+        ((IMouseMixin) MinecraftClient.getInstance().mouse).unsetKeepScreen();
     }
 }
