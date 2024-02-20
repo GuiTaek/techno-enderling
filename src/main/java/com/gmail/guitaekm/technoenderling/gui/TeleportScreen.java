@@ -98,7 +98,7 @@ public class TeleportScreen extends HandledScreen<TeleportScreenHandler> impleme
             int centerY = this.height / 2;
             this.currentMouseOver = null;
             List<EnderworldPortalBlock.NetherInstance> selected = new ArrayList<>();
-            RenderSystem.setShaderTexture(0, new Identifier("minecraft:textures/block/dirt.png"));
+            RenderSystem.setShaderTexture(0, new Identifier("technoenderling:textures/gui/enderworld_portal_icon.png"));
 
             for (EnderworldPortalBlock.NetherInstance dest : this.handler.registeredEnderworldPortalPositions) {
                 Vec3d vec3dDest = new Vec3d(dest.pos().getX(), dest.pos().getY(), dest.pos().getZ());
