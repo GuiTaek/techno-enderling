@@ -36,9 +36,6 @@ public class TeleportDestinations {
     }
 
     public void writeToPacket(PacketByteBuf packet) {
-        // todo: could this lead to pointer problems, when
-        // this.source.equals(this.destinations.get(sourceIndex))
-        // but this.source != this.destinations.get(sourceIndex)?
         packet.writeInt(this.destinations.indexOf(this.source));
         packet.writeCollection(
                 this.destinations,
