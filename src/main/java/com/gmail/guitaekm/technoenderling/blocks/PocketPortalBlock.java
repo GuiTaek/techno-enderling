@@ -22,7 +22,6 @@ import net.minecraft.util.math.Vec3i;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.gen.feature.StructureFeature;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -68,13 +67,13 @@ public class PocketPortalBlock extends Block implements HandleLongUseServer.List
                 .STRUCTURE_FEATURE
                 .get(new Identifier(TechnoEnderling.MOD_ID, "rare_pocket_portal"));
         if (player.getWorld().getRegistryKey().equals(info.pocketDimensionKey())) {
-            BlockPos targetPos = ((IServerPlayerEntityAccess)(Object)player).technoEnderling$getLastUsedPocketPortal();
+            BlockPos targetPos = ((IServerPlayerEntityAccess)(Object)player).techno_enderling$getLastUsedPocketPortal();
             if (targetPos == null) {
                 TechnoEnderling.LOGGER.warn("Tried to leave the pocket dimension two times in the row. The player likely used another teleportation method");
                 // todo: spawn the player at spawn
                 return;
             }
-            ((IServerPlayerEntityAccess) player).technoEnderling$setLastUsedPocketPortal(null);
+            ((IServerPlayerEntityAccess) player).techno_enderling$setLastUsedPocketPortal(null);
             if (!info.enderworld().getStructureAccessor().getStructureAt(targetPos, rarePocketPortal).hasChildren()) {
                 if (!info.enderworld().getStructureAccessor().getStructureAt(targetPos, commonPocketPortal).hasChildren()) {
                     TechnoEnderling.LOGGER.warn("corrupted player data");
@@ -85,7 +84,7 @@ public class PocketPortalBlock extends Block implements HandleLongUseServer.List
             PocketPortalBlock.pocketPortalTeleport(info.enderworld(), player, pocketPortal, targetPos);
 
         } else if (player.getWorld().getRegistryKey().equals(info.enderworldKey())) {
-            ((IServerPlayerEntityAccess) player).technoEnderling$setLastUsedPocketPortal(pos.up());
+            ((IServerPlayerEntityAccess) player).techno_enderling$setLastUsedPocketPortal(pos.up());
             // the position should be different for each player and depend on the seed and the hash value of the player name
             this.preparePocketDimension(info.pocketDimension(), new BlockPos(0, 0, 0));
             PocketPortalBlock.pocketPortalTeleport(info.pocketDimension(), player, pocketPortal, new BlockPos(0, 5, 0));

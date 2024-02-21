@@ -4,6 +4,6 @@ import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.Nullable;
 
 public interface IServerPlayerEntityAccess {
-    void technoEnderling$setLastUsedPocketPortal(@Nullable BlockPos position);
-    @Nullable BlockPos technoEnderling$getLastUsedPocketPortal();
+    void techno_enderling$setLastUsedPocketPortal(@Nullable BlockPos position);
+    @Nullable BlockPos techno_enderling$getLastUsedPocketPortal();
 }

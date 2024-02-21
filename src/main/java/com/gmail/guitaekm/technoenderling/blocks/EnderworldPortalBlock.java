@@ -1,43 +1,27 @@
 package com.gmail.guitaekm.technoenderling.blocks;
 
 import com.gmail.guitaekm.technoenderling.TechnoEnderling;
+import com.gmail.guitaekm.technoenderling.access.IServerPlayerNetherEnderworldPortal;
 import com.gmail.guitaekm.technoenderling.enderling_structure.EnderlingStructure;
 import com.gmail.guitaekm.technoenderling.enderling_structure.EnderlingStructureInitializer;
 import com.gmail.guitaekm.technoenderling.enderling_structure.LinkGeneratedEnderworldPortal;
-import com.gmail.guitaekm.technoenderling.gui.RegisterGui;
 import com.gmail.guitaekm.technoenderling.gui.TeleportScreenFactory;
-import com.gmail.guitaekm.technoenderling.gui.TeleportScreenHandler;
 import com.gmail.guitaekm.technoenderling.networking.HandleLongUseServer;
-import com.gmail.guitaekm.technoenderling.networking.ModNetworking;
 import com.gmail.guitaekm.technoenderling.point_of_interest.ModPointsOfInterest;
 import com.gmail.guitaekm.technoenderling.utils.ArbitraryStructure;
 import com.gmail.guitaekm.technoenderling.utils.TeleportParams;
 import com.gmail.guitaekm.technoenderling.utils.VehicleTeleport;
 import com.gmail.guitaekm.technoenderling.worldgen.ModWorlds;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.screen.MerchantScreenHandler;
-import net.minecraft.screen.NamedScreenHandlerFactory;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.SimpleNamedScreenHandlerFactory;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
-import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.*;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.util.registry.RegistryKey;
-import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 import net.minecraft.world.border.WorldBorder;
 import net.minecraft.world.poi.PointOfInterest;
@@ -147,7 +131,20 @@ public class EnderworldPortalBlock extends Block implements HandleLongUseServer.
         if (player.getWorld().getRegistryKey().getValue().equals(
             new Identifier("minecraft:the_nether")
         )) {
+            Optional<BlockPos> portalPosOptional = info.portal.placeable().check(player.getWorld(), pos);
+            if (portalPosOptional.isEmpty()) {
+                TechnoEnderling.LOGGER.warn("Invalid portal block found. Invalidating it");
+                player.getWorld().setBlockState(pos, this.unactiveCounterpart.getDefaultState());
+                return;
+            }
+            // configure
+            BlockPos toAddToDestinations = portalPosOptional.get().add(0, 2, 0);
+            EnderworldPortalBlock.NetherInstance source = ((IServerPlayerNetherEnderworldPortal)player)
+                    .techno_enderling$addIfNotPresent(toAddToDestinations);
+            ((IServerPlayerNetherEnderworldPortal)player).techno_enderling$setSource(source);
             player.openHandledScreen(new TeleportScreenFactory());
+            // it's probably better to remove the source after the screen
+            ((IServerPlayerNetherEnderworldPortal)player).techno_enderling$setSource(null);
             return;
         }
         if(player.getWorld().getBlockState(pos).get(GENERATED)) {

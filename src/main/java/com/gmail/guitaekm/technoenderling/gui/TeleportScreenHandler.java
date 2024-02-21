@@ -3,6 +3,7 @@
 package com.gmail.guitaekm.technoenderling.gui;
 
 import com.gmail.guitaekm.technoenderling.TechnoEnderling;
+import com.gmail.guitaekm.technoenderling.access.IServerPlayerNetherEnderworldPortal;
 import com.gmail.guitaekm.technoenderling.blocks.EnderworldPortalBlock;
 import com.gmail.guitaekm.technoenderling.enderling_structure.EnderlingStructureInitializer;
 import com.gmail.guitaekm.technoenderling.networking.ModNetworking;
@@ -141,13 +142,8 @@ public class TeleportScreenHandler extends ScreenHandler implements ServerPlayNe
     // or even that this is inside ScreenHandler
     public static Pair<EnderworldPortalBlock.NetherInstance, List<EnderworldPortalBlock.NetherInstance>>
     getPlayerStoredPortals(ServerPlayerEntity player) {
-        EnderworldPortalBlock.NetherInstance source = new EnderworldPortalBlock.NetherInstance(0, "home", new BlockPos(0, 64, 0));
-        List<EnderworldPortalBlock.NetherInstance> destinations = List.of(
-                source,
-                new EnderworldPortalBlock.NetherInstance(1, "10-64-0", new BlockPos(10, 64, 0)),
-                new EnderworldPortalBlock.NetherInstance(2, "0-64-10", new BlockPos(0, 64, 10)),
-                new EnderworldPortalBlock.NetherInstance(3, "10-64-10", new BlockPos(-10, 64, 10))
-        );
+        EnderworldPortalBlock.NetherInstance source = ((IServerPlayerNetherEnderworldPortal)player).techno_enderling$getSource();
+        List<EnderworldPortalBlock.NetherInstance> destinations = ((IServerPlayerNetherEnderworldPortal)player).techno_enderling$getDestinations();
         return new Pair<>(source, destinations);
     }
 }
