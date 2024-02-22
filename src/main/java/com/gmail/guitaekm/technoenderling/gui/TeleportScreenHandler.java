@@ -101,7 +101,7 @@ public class TeleportScreenHandler extends ScreenHandler implements ServerPlayNe
         if (destPosOptional.isEmpty()) {
             return;
         }
-        if (!payTeleportPrice(player)) {
+        if (!payTeleportPrice(player.server, player)) {
             return;
         }
         Vec3d destPos = destPosOptional.get();
@@ -116,15 +116,15 @@ public class TeleportScreenHandler extends ScreenHandler implements ServerPlayNe
         VehicleTeleport.teleportWithVehicle(params);
     }
 
-    public boolean payTeleportPrice(ServerPlayerEntity player) {
+    public boolean payTeleportPrice(MinecraftServer server, ServerPlayerEntity player) {
         if (player.isCreative() || player.isSpectator()) {
             return true;
         }
         for (int i = 0; i < player.getInventory().size(); i++) {
             ItemStack stack = player.getInventory().getStack(i);
             if (stack.getItem().equals(Items.ENDER_PEARL)) {
-                // todo: sync with client
                 stack.split(1);
+                server.getPlayerManager().sendPlayerStatus(player);
                 return true;
             }
         }
