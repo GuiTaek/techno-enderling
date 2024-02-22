@@ -27,8 +27,9 @@ import java.util.Optional;
 import java.util.Set;
 
 public class PocketPortalBlock extends Block implements HandleLongUseServer.Listener {
+    // these will be configured through arbitrary structures -- it's just not implemented yet
     // configure
-    public static Set<Vec3i> END_BRICKS_OFFSETS = Set.of(
+    public static Set<Vec3i> MANTLE_OFFSETS = Set.of(
             new Vec3i(0, 1, 0),
             new Vec3i(0, 2, 0),
             new Vec3i(1, 3, 0),
@@ -41,6 +42,30 @@ public class PocketPortalBlock extends Block implements HandleLongUseServer.List
     // configure
     public static Vec3i CORE_OFFSET = new Vec3i(0, 3, 0);
 
+    // configure
+    public static List<Set<Block>> WARD_BLOCK = List.of(
+            Set.of(
+                    Blocks.END_STONE_BRICKS
+            ),
+            Set.of(
+                    Blocks.IRON_BLOCK
+            ),
+            Set.of(
+                    Blocks.DIAMOND_BLOCK,
+                    Blocks.AMETHYST_BLOCK
+            ),
+            Set.of(
+                    Blocks.NETHERITE_BLOCK,
+                    Blocks.BEACON
+            )
+    );
+
+    // configure
+    public static List<Vec3i> WARD_POWERS = List.of(
+            new Vec3i(4, 2, 4),
+            new Vec3i(8, 4, 8),
+            new Vec3i(16, 8, 16)
+    );
     // configure
     public static double DROP_CHANCE = 0.8;
     public PocketPortalBlock(Settings settings) {
@@ -107,7 +132,7 @@ public class PocketPortalBlock extends Block implements HandleLongUseServer.List
             for (int y = ignoreLayers; y < size.getY(); y++) {
                 for (int z = 0; z < size.getZ(); z++) {
                     Vec3i toPortalBlockOffset = new Vec3i(x, y, z).add(pocketPortalOffset).add(0, 1, 0);
-                    if (END_BRICKS_OFFSETS.contains(toPortalBlockOffset) || CORE_OFFSET.equals(toPortalBlockOffset)) {
+                    if (MANTLE_OFFSETS.contains(toPortalBlockOffset) || CORE_OFFSET.equals(toPortalBlockOffset)) {
                         continue;
                     }
                     BlockPos toDestroy = position.add(x, y, z);
@@ -222,24 +247,26 @@ public class PocketPortalBlock extends Block implements HandleLongUseServer.List
      * @return the dimensions the pocket portal should have, but only the radiusses
      */
     public Vec3i getPocketDimensionDimensions(ServerWorld pocketDimension, BlockPos portalPos) {
-        List<Vec3i> notFittingBlocks = END_BRICKS_OFFSETS.stream().filter(offset -> (
+        Vec3i firstOffset = MANTLE_OFFSETS.iterator().next();
+        Block mantleBlock = pocketDimension
+                .getBlockState(portalPos.add(firstOffset.getX(), firstOffset.getY(), firstOffset.getZ()))
+                .getBlock();
+        List<Vec3i> notFittingBlocks = MANTLE_OFFSETS.stream().filter(offset -> (
                 pocketDimension
                         .getBlockState(portalPos.add(offset.getX(), offset.getY(), offset.getZ()))
                         .getBlock()
-                        != Blocks.END_STONE_BRICKS
+                        != mantleBlock
         )).toList();
         if (!notFittingBlocks.isEmpty()) {
             return new Vec3i(0, 0, 0);
         }
-        Block toCheck = pocketDimension.getBlockState(portalPos.add(CORE_OFFSET.getX(), CORE_OFFSET.getY(), CORE_OFFSET.getZ())).getBlock();
-        if (toCheck == Blocks.IRON_BLOCK) {
-            return new Vec3i(4, 2, 4);
-        }
-        if (toCheck == Blocks.DIAMOND_BLOCK) {
-            return new Vec3i(8, 4, 8);
-        }
-        if (toCheck == Blocks.BEACON || toCheck == Blocks.NETHERITE_BLOCK) {
-            return new Vec3i(16, 8, 16);
+        Block coreBlock = pocketDimension.getBlockState(portalPos.add(CORE_OFFSET.getX(), CORE_OFFSET.getY(), CORE_OFFSET.getZ())).getBlock();
+        for (int i = 0; i < WARD_POWERS.size(); i++) {
+            if (WARD_BLOCK.get(i).contains(mantleBlock)) {
+                if (WARD_BLOCK.get(i + 1).contains(coreBlock)) {
+                    return WARD_POWERS.get(i);
+                }
+            }
         }
         return new Vec3i(0, 0, 0);
     }
