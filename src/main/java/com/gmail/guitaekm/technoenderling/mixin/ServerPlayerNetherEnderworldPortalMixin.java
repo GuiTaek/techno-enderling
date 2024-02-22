@@ -66,7 +66,7 @@ public class ServerPlayerNetherEnderworldPortalMixin implements IServerPlayerNet
             for (int i = 0; i < 10; ++i) {
                 Set<String> possibleNames = IntStream.range(BATCH_SIZE * i, BATCH_SIZE * i + BATCH_SIZE)
                         .boxed()
-                        .map(id ->DEFAULT_NAME + id)
+                        .map(id ->DEFAULT_NAME + (id + 1))
                         .collect(Collectors.toSet());
                 // average complexity: theta(n)
                 // source: https://www.baeldung.com/java-hashset-removeall-performance
