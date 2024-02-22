@@ -19,11 +19,12 @@ public class ServerPlayerNetherEnderworldPortalMixin implements IServerPlayerNet
     // configure
     @Unique
     private static String DEFAULT_NAME = "portal-";
+    // configure
     @Unique
     private static String FALLBACK_NAME = "no-new-name-found";
     //configure
     @Unique
-    private static int BATCH_SIZE = 10;
+    private static int BATCH_SIZE = 1000;
     @Unique
     private final List<EnderworldPortalBlock.NetherInstance> savedDestinations = new ArrayList<>();
     @Unique
@@ -61,18 +62,14 @@ public class ServerPlayerNetherEnderworldPortalMixin implements IServerPlayerNet
             Set<String> savedNamesSet = new HashSet<>(
                     this.savedDestinations.stream().map(instance -> instance.name()).toList()
             );
-            savedNamesSet = IntStream.range(0, 100_000)
-                    .boxed()
-                    .map(id ->DEFAULT_NAME + id)
-                    .collect(Collectors.toSet());
             String resultName = null;
-            // average complexity: theta(n)
-            // source: https://www.baeldung.com/java-hashset-removeall-performance
             for (int i = 0; i < 10; ++i) {
                 Set<String> possibleNames = IntStream.range(BATCH_SIZE * i, BATCH_SIZE * i + BATCH_SIZE)
                         .boxed()
                         .map(id ->DEFAULT_NAME + id)
                         .collect(Collectors.toSet());
+                // average complexity: theta(n)
+                // source: https://www.baeldung.com/java-hashset-removeall-performance
                 possibleNames.removeAll(savedNamesSet);
                 if (!possibleNames.isEmpty()) {
                     resultName =  possibleNames
