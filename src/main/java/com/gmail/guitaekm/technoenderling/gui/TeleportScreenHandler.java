@@ -83,7 +83,8 @@ public class TeleportScreenHandler extends ScreenHandler implements ServerPlayNe
                 new Identifier(TechnoEnderling.MOD_ID, "enderworld_portal_lit")
         ).check(world, destination);
         if (enderworldPortalOptional.isEmpty()) {
-            TechnoEnderling.LOGGER.warn("bad nether teleport request");
+            TechnoEnderling.LOGGER.warn("bad nether teleport request, removing the destination");
+            EnderworldPortalBlock.removeNetherDestination(world.getServer(), world, destination);
             return;
         }
         Optional<Vec3d> destPosOptional = VehicleTeleport.findWakeUpPosition(

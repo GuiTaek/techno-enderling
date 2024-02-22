@@ -15,9 +15,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.*;
-import java.util.function.Consumer;
-import java.util.function.IntUnaryOperator;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -25,17 +22,22 @@ import java.util.stream.IntStream;
 public class ServerPlayerNetherEnderworldPortalMixin implements IServerPlayerNetherEnderworldPortal {
     // configure
     @Unique
-    private static String DEFAULT_NAME = "portal-";
+    private static final String DEFAULT_NAME = "portal-";
     // configure
     @Unique
-    private static String FALLBACK_NAME = "no-new-name-found";
+    private static final String FALLBACK_NAME = "no-new-name-found";
     //configure
     @Unique
-    private static int BATCH_SIZE = 1000;
+    private static final int BATCH_SIZE = 1000;
     @Unique
     private final List<EnderworldPortalBlock.NetherInstance> savedDestinations = new ArrayList<>();
     @Unique
     private EnderworldPortalBlock.NetherInstance source = null;
+
+    @Override
+    public void techno_nederling$remove(BlockPos pos) {
+        this.savedDestinations.removeIf(instance -> instance.pos().equals(pos));
+    }
 
     @Override
     public void techno_enderling$remove(EnderworldPortalBlock.NetherInstance portal) {
@@ -64,10 +66,9 @@ public class ServerPlayerNetherEnderworldPortalMixin implements IServerPlayerNet
                 .filter(instance -> pos.equals(instance.pos()))
                 .toList();
         if (possibleInstances.isEmpty()) {
-            Integer resultIndex = null;
             // average complexity: theta(n)
             Set<String> savedNamesSet = new HashSet<>(
-                    this.savedDestinations.stream().map(instance -> instance.name()).toList()
+                    this.savedDestinations.stream().map(EnderworldPortalBlock.NetherInstance::name).toList()
             );
             String resultName = null;
             for (int i = 0; i < 10; ++i) {
@@ -113,6 +114,7 @@ public class ServerPlayerNetherEnderworldPortalMixin implements IServerPlayerNet
     }
 
     // todo: probably needs to be in a util class
+    @Unique
     private static void putPos(String name, NbtCompound nbt, BlockPos pos) {
         NbtCompound posNbt = new NbtCompound();
         posNbt.putInt("x", pos.getX());
@@ -122,12 +124,14 @@ public class ServerPlayerNetherEnderworldPortalMixin implements IServerPlayerNet
     }
 
     // todo: probably needs to be in a util class
+    @Unique
     private static BlockPos getPos(String name, NbtCompound nbt) {
         NbtCompound nbtPos = nbt.getCompound(name);
         return new BlockPos(nbtPos.getInt("x"), nbtPos.getInt("y"), nbtPos.getInt("z"));
     }
 
     // todo: probably needs to be in a util class
+    @Unique
     private static NbtCompound instanceToNbt(EnderworldPortalBlock.NetherInstance instance) {
         NbtCompound nbtInstance = new NbtCompound();
         nbtInstance.putString("name", instance.name());
@@ -137,6 +141,7 @@ public class ServerPlayerNetherEnderworldPortalMixin implements IServerPlayerNet
     }
 
     // todo: probably needs to be in a util class
+    @Unique
     private static EnderworldPortalBlock.NetherInstance nbtToInstance(NbtCompound nbtInstance) {
         String instanceName = nbtInstance.getString("name");
         BlockPos pos = getPos("pos", nbtInstance);

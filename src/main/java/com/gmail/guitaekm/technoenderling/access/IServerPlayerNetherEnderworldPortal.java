@@ -7,6 +7,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 public interface IServerPlayerNetherEnderworldPortal {
+    void techno_nederling$remove(BlockPos pos);
     void techno_enderling$remove(EnderworldPortalBlock.NetherInstance portal);
     void techno_enderling$add(EnderworldPortalBlock.NetherInstance portal);
     List<EnderworldPortalBlock.NetherInstance> techno_enderling$getDestinations();

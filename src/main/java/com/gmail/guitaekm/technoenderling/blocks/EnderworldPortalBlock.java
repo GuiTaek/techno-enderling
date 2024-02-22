@@ -15,6 +15,9 @@ import com.gmail.guitaekm.technoenderling.worldgen.ModWorlds;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -22,6 +25,9 @@ import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.*;
+import net.minecraft.util.registry.Registry;
+import net.minecraft.util.registry.RegistryKey;
+import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 import net.minecraft.world.border.WorldBorder;
 import net.minecraft.world.poi.PointOfInterest;
@@ -30,6 +36,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 public class EnderworldPortalBlock extends Block implements HandleLongUseServer.Listener {
@@ -413,16 +420,44 @@ public class EnderworldPortalBlock extends Block implements HandleLongUseServer.
                 .arbitraryStructureRegistry
                 .get(new Identifier(TechnoEnderling.MOD_ID, "enderworld_portal_generated"));
 
+        assert world.getServer() != null;
         if (state.get(EnderworldPortalBlock.GENERATED)) {
             if (portalGenerated.check(world, pos).isEmpty()) {
+                removeNetherDestination(world.getServer(), world, pos);
                 return this.unactiveCounterpart.getDefaultState();
             }
         } else {
             if (portal.placeable().check(world, pos).isEmpty()) {
+                removeNetherDestination(world.getServer(), world, pos);
                 return this.unactiveCounterpart.getDefaultState();
             }
         }
         return super.getStateForNeighborUpdate(state, direction, neighborState, world, pos, neighborPos);
     }
     public record NetherInstance(int id, String name, BlockPos pos) { }
+
+    @Override
+    public void onBroken(WorldAccess world, BlockPos pos, BlockState state) {
+        if (world.isClient()) {
+            super.onBroken(world, pos, state);
+            return;
+        }
+        removeNetherDestination(world.getServer(), world, pos);
+        super.onBroken(world, pos, state);
+    }
+
+    public static void removeNetherDestination(MinecraftServer server, WorldAccess world, BlockPos pos) {
+        RegistryKey<World> netherKey = RegistryKey.of(
+                Registry.WORLD_KEY,
+                new Identifier("minecraft:the_nether")
+        );
+        ServerWorld nether = server.getWorld(netherKey);
+        assert nether != null;
+        boolean isNether = world.getDimension().equals(nether.getDimension());
+        if (isNether) {
+            server.getPlayerManager().getPlayerList().forEach(
+                    arbitraryPlayer -> ((IServerPlayerNetherEnderworldPortal)arbitraryPlayer).techno_nederling$remove(pos)
+            );
+        }
+    }
 }
