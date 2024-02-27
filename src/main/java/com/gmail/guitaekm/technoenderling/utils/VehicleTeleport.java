@@ -99,18 +99,22 @@ public class VehicleTeleport {
         }
         // scraped from the needed part of net.minecraft.server.command.TeleportCommand.teleport
         // again, I don't want to change this part, I just want to use it
-        Entity oldEntity = entity;
-        oldEntity.detach();
-        entity = entity.getType().create(targetWorld);
-        assert entity != null;
+        if (targetWorld == entity.world) {
+            entity.refreshPositionAndAngles(x, y, z, yaw, 0);
+            entity.setHeadYaw(yaw);
+        } else {
+            Entity oldEntity = entity;
+            oldEntity.detach();
+            entity = entity.getType().create(targetWorld);
+            assert entity != null;
 
-        entity.copyFrom(oldEntity);
-        entity.refreshPositionAndAngles(x, y, z, yaw, 0);
-        entity.setHeadYaw(yaw);
-        entity.setBodyYaw(entity.getYaw());
-        oldEntity.setRemoved(Entity.RemovalReason.CHANGED_DIMENSION);
-        targetWorld.onDimensionChanged(entity);
-
+            entity.copyFrom(oldEntity);
+            entity.refreshPositionAndAngles(x, y, z, yaw, 0);
+            entity.setHeadYaw(yaw);
+            entity.setBodyYaw(entity.getYaw());
+            oldEntity.setRemoved(Entity.RemovalReason.CHANGED_DIMENSION);
+            targetWorld.onDimensionChanged(entity);
+        }
         return entity;
     }
 

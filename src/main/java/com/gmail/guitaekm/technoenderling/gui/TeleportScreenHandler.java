@@ -15,6 +15,7 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
@@ -49,6 +50,8 @@ public class TeleportScreenHandler extends ScreenHandler implements ServerPlayNe
         this.registeredEnderworldPortalPositions = result.getRight();
         ServerPlayNetworking.unregisterReceiver(player.networkHandler, ModNetworking.REQUEST_NETHER_TELEPORT);
         ServerPlayNetworking.registerReceiver(player.networkHandler, ModNetworking.REQUEST_NETHER_TELEPORT, this);
+        this.vehicle = player.getVehicle();
+        player.dismountVehicle();
     }
     // client
     public TeleportScreenHandler(
@@ -83,6 +86,7 @@ public class TeleportScreenHandler extends ScreenHandler implements ServerPlayNe
         );
     }
     public void requestTeleportServer(ServerPlayerEntity player, ServerWorld world, BlockPos destination) {
+        player.startRiding(this.vehicle);
         Optional<BlockPos> enderworldPortalOptional = EnderlingStructureInitializer.arbitraryStructureRegistry.get(
                 new Identifier(TechnoEnderling.MOD_ID, "enderworld_portal_lit")
         ).check(world, destination);
@@ -137,6 +141,7 @@ public class TeleportScreenHandler extends ScreenHandler implements ServerPlayNe
     }
     public EnderworldPortalBlock.NetherInstance source;
     public List<EnderworldPortalBlock.NetherInstance> registeredEnderworldPortalPositions;
+    public Entity vehicle;
 
     @Override
     public boolean canUse(PlayerEntity player) {
