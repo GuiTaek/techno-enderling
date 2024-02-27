@@ -81,8 +81,15 @@ public class RenamingScreenHandler extends ScreenHandler implements ServerPlayNe
         if (packet.button == AnswerRenamingRequest.ButtonPressed.FORGET) {
             playerEnderworldPortal.techno_enderling$removeWithName(this.currName);
         }
+        if (packet.button == AnswerRenamingRequest.ButtonPressed.CANCEL) {
+            EnderworldPortalBlock.NetherInstance instance = playerEnderworldPortal
+                    .techno_enderling$getDestinations()
+                    .stream()
+                    .filter(checkInstance ->
+                            checkInstance.pos().equals(this.pos)).findFirst().orElse(null);
+            playerEnderworldPortal.techno_enderling$setSource(instance);
+        }
         player.openHandledScreen(new TeleportScreenFactory());
-        TechnoEnderling.LOGGER.info("received unimplemented packet");
         ServerPlayNetworking.unregisterReceiver(player.networkHandler, ModNetworking.ANSWER_RENAMING_REQUEST);
     }
 }
