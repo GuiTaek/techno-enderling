@@ -241,11 +241,6 @@ public class TeleportScreen extends HandledScreen<TeleportScreenHandler> impleme
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (this.currentMouseOver != null) {
-            if (this.handler.source == this.currentMouseOver) {
-                TechnoEnderling.LOGGER.info("todo: implement changing names");
-                MinecraftClient.getInstance().setScreen(null);
-                return true;
-            }
             this.handler.requestTeleportClient(this.handler.registeredEnderworldPortalPositions.indexOf(this.currentMouseOver));
             MinecraftClient.getInstance().setScreen(null);
             return true;

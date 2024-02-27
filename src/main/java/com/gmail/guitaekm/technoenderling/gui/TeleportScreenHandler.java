@@ -42,7 +42,7 @@ public class TeleportScreenHandler extends ScreenHandler implements ServerPlayNe
             ServerPlayerEntity player,
             int syncId
     ) {
-        super(RegisterGui.TELEPORT_SCREEN_HANDLER, syncId);
+        super(RegisterGui.TELEPORT_SCREEN_HANDLER_TYPE, syncId);
         Pair<EnderworldPortalBlock.NetherInstance, List<EnderworldPortalBlock.NetherInstance>>
                 result = TeleportScreenHandler.getPlayerStoredPortals(player);
         this.source = result.getLeft();
@@ -54,7 +54,7 @@ public class TeleportScreenHandler extends ScreenHandler implements ServerPlayNe
     public TeleportScreenHandler(
             int syncId, PlayerInventory inventory, PacketByteBuf buf
     ) {
-        super(RegisterGui.TELEPORT_SCREEN_HANDLER, syncId);
+        super(RegisterGui.TELEPORT_SCREEN_HANDLER_TYPE, syncId);
         TeleportDestinations packet = new TeleportDestinations(buf);
         this.source = packet.source;
         this.registeredEnderworldPortalPositions = packet.destinations;
@@ -68,6 +68,10 @@ public class TeleportScreenHandler extends ScreenHandler implements ServerPlayNe
     @Override
     public void receive(MinecraftServer server, ServerPlayerEntity player, ServerPlayNetworkHandler handler, PacketByteBuf buf, PacketSender responseSender) {
         RequestNetherTeleport packet = new RequestNetherTeleport(buf);
+        if (this.source.equals(this.registeredEnderworldPortalPositions.get(packet.destinationId))) {
+            player.openHandledScreen(new RenamingScreenFactory(this.source.name(), this.source.pos()));
+            return;
+        }
         RegistryKey<World> netherKey = RegistryKey.of(
                 Registry.WORLD_KEY,
                 new Identifier("minecraft:the_nether")
@@ -136,7 +140,12 @@ public class TeleportScreenHandler extends ScreenHandler implements ServerPlayNe
 
     @Override
     public boolean canUse(PlayerEntity player) {
-        return true;
+        BlockPos pos = this.source.pos();
+        return player.squaredDistanceTo(
+                (double)pos.getX() + 0.5,
+                (double)pos.getY() + 0.5,
+                (double)pos.getZ() + 0.5
+        ) <= 64;
     }
 
     // it's weird that you don't get an instance of TeleportScreenHandler in ExtendedScreenFactory.writeScreenOpeningData
