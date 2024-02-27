@@ -68,7 +68,7 @@ public class TeleportScreenHandler extends ScreenHandler implements ServerPlayNe
     @Override
     public void receive(MinecraftServer server, ServerPlayerEntity player, ServerPlayNetworkHandler handler, PacketByteBuf buf, PacketSender responseSender) {
         RequestNetherTeleport packet = new RequestNetherTeleport(buf);
-        if (this.source.equals(this.registeredEnderworldPortalPositions.get(packet.destinationId))) {
+        if (this.source != null && this.source.equals(this.registeredEnderworldPortalPositions.get(packet.destinationId))) {
             player.openHandledScreen(new RenamingScreenFactory(this.source.name(), this.source.pos()));
             return;
         }
@@ -140,6 +140,9 @@ public class TeleportScreenHandler extends ScreenHandler implements ServerPlayNe
 
     @Override
     public boolean canUse(PlayerEntity player) {
+        if (this.source == null) {
+            return true;
+        }
         BlockPos pos = this.source.pos();
         return player.squaredDistanceTo(
                 (double)pos.getX() + 0.5,

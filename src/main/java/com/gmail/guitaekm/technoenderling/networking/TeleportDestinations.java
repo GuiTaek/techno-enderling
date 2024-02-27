@@ -31,7 +31,11 @@ public class TeleportDestinations {
                 return new EnderworldPortalBlock.NetherInstance(id++, packet.readString(), packet.readBlockPos());
             }
         });
-        this.source = destinations.get(sourceIndex);
+        if (sourceIndex == -1) {
+            this.source = null;
+        } else {
+            this.source = destinations.get(sourceIndex);
+        }
         this.destinations = destinations;
     }
 

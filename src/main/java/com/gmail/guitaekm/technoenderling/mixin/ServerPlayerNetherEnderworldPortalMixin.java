@@ -113,6 +113,31 @@ public class ServerPlayerNetherEnderworldPortalMixin implements IServerPlayerNet
         return this.source;
     }
 
+    @Override
+    public void techno_enderling$setName(String currName, String newName) {
+        if (!this.savedDestinations.stream().filter(
+                instance -> instance.name().equals(newName)
+        ).toList().isEmpty()) {
+            // better would be to notify the user, but I just want to release
+            return;
+        }
+        List<EnderworldPortalBlock.NetherInstance> result = new ArrayList<>(this.savedDestinations.stream().map(
+                instance -> {
+                    return instance.name().equals(currName)
+                            ? new EnderworldPortalBlock.NetherInstance(instance.id(), newName, instance.pos())
+                            : instance;
+                }
+        ).toList());
+        // it sounds weird, but the complexity is the same for recreating the list and for just changing in-place
+        this.savedDestinations.clear();
+        this.savedDestinations.addAll(result);
+    }
+
+    @Override
+    public void techno_enderling$removeWithName(String name) {
+        this.savedDestinations.removeIf(instance -> instance.name().equals(name));
+    }
+
     // todo: probably needs to be in a util class
     @Unique
     private static void putPos(String name, NbtCompound nbt, BlockPos pos) {

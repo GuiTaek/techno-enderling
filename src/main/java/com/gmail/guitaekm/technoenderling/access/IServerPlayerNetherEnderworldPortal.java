@@ -14,5 +14,7 @@ public interface IServerPlayerNetherEnderworldPortal {
     void techno_enderling$setSource(@Nullable EnderworldPortalBlock.NetherInstance source);
     EnderworldPortalBlock.NetherInstance techno_enderling$addIfNotPresent(BlockPos pos);
     @Nullable EnderworldPortalBlock.NetherInstance techno_enderling$getSource();
+    void techno_enderling$setName(String currName, String newName);
+    void techno_enderling$removeWithName(String name);
 
 }

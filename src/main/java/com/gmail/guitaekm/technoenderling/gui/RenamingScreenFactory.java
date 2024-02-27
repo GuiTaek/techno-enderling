@@ -22,7 +22,7 @@ public class RenamingScreenFactory implements ExtendedScreenHandlerFactory {
 
     @Override
     public ScreenHandler createMenu(int syncId, PlayerInventory inv, PlayerEntity player) {
-        return new RenamingScreenHandler(syncId, name, pos);
+        return new RenamingScreenHandler(syncId, name, pos, (ServerPlayerEntity) player);
     }
 
     @Override

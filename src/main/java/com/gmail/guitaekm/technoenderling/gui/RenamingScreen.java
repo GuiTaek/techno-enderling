@@ -2,6 +2,7 @@ package com.gmail.guitaekm.technoenderling.gui;
 
 import com.gmail.guitaekm.technoenderling.TechnoEnderling;
 import com.gmail.guitaekm.technoenderling.access.IServerPlayerNetherEnderworldPortal;
+import com.gmail.guitaekm.technoenderling.networking.AnswerRenamingRequest;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
@@ -43,21 +44,21 @@ public class RenamingScreen extends HandledScreen<RenamingScreenHandler> {
         this.addDrawableChild(nameField);
         // the 20 is a number tied to minecraft textures of buttons
         this.okButton = new ButtonWidget(
-                BUTTON_WIDTH, HEIGHT_BUTTONS, BUTTON_WIDTH, 20, Text.of("ok"), button -> {
-            TechnoEnderling.LOGGER.info("ok");
-        }
+            BUTTON_WIDTH, HEIGHT_BUTTONS, BUTTON_WIDTH, 20, Text.of("ok"), button -> {
+                this.handler.sendAnswer(this.nameField.getText(), AnswerRenamingRequest.ButtonPressed.OK);
+            }
         );
         this.addDrawableChild(this.okButton);
 
         this.cancelButton = new ButtonWidget(
-                3 * BUTTON_WIDTH, HEIGHT_BUTTONS, BUTTON_WIDTH, 20, Text.of("cancel"), button -> {
-                    TechnoEnderling.LOGGER.info("cancel");
-                }
+            3 * BUTTON_WIDTH, HEIGHT_BUTTONS, BUTTON_WIDTH, 20, Text.of("cancel"), button -> {
+                this.handler.sendAnswer(this.nameField.getText(), AnswerRenamingRequest.ButtonPressed.CANCEL);
+            }
         );
         this.addDrawableChild(this.cancelButton);
         this.forgetButton = new ButtonWidget(
                 5 * BUTTON_WIDTH, HEIGHT_BUTTONS, BUTTON_WIDTH, 20, Text.of("forget"), button -> {
-            TechnoEnderling.LOGGER.info("forget");
+            this.handler.sendAnswer(this.nameField.getText(), AnswerRenamingRequest.ButtonPressed.FORGET);
         }
         );
         this.addDrawableChild(this.forgetButton);
