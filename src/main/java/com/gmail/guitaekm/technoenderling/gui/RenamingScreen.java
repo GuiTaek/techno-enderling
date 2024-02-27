@@ -10,6 +10,7 @@ import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.screen.ScreenHandler;
+import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
 
@@ -24,6 +25,12 @@ public class RenamingScreen extends HandledScreen<RenamingScreenHandler> {
     public String currName;
     public RenamingScreen(RenamingScreenHandler handler, PlayerInventory inventory, Text title) {
         super(handler, new EmptyInventory(), title);
+        this.currName = handler.currName;
+    }
+
+    @Override
+    public boolean isPauseScreen() {
+        return true;
     }
 
     @Override
@@ -36,11 +43,16 @@ public class RenamingScreen extends HandledScreen<RenamingScreenHandler> {
     protected TextFieldWidget nameField;
     @Override
     protected void init() {
-        // super.init();
+        super.init();
         nameField = new TextFieldWidget(
                 MinecraftClient.getInstance().textRenderer,
-                BUTTON_WIDTH, HEIGHT_FIELD, 5 * BUTTON_WIDTH, 20, Text.of(this.currName)
+                BUTTON_WIDTH, HEIGHT_FIELD, 5 * BUTTON_WIDTH, 20, Text.of("")
         );
+        // weirdly enough, this can't be done inside the TextFieldWidget-constructor
+        nameField.setText(this.currName);
+        setInitialFocus(nameField);
+        nameField.setSelectionStart(0);
+        nameField.setSelectionEnd(this.currName.length());
         this.addDrawableChild(nameField);
         // the 20 is a number tied to minecraft textures of buttons
         this.okButton = new ButtonWidget(
