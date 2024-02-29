@@ -6,7 +6,7 @@
   "temperature": 0.5,
   "temperature_modifier": "none",
   "downfall": 0.5,
-  "creature_spawn_probability": 0.3,
+  "creature_spawn_probability": 0.0,
   "effects": {
     "fog_color": 8025320,
     "sky_color": 4010652,

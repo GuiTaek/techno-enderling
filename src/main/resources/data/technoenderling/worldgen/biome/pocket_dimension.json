@@ -12,9 +12,9 @@
   "precipitation": "none",
   "surface_builder": "minecraft:grass",
   "scale": 0,
-  "downfall": 0,
+  "downfall": 0.5,
   "depth": 0,
-  "temperature": 0.8,
+  "temperature": 0.5,
   "player_spawn_friendly": true,
   "spawn_costs": {},
   "creature_spawn_probability": 0
