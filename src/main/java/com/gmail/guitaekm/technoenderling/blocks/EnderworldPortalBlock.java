@@ -8,16 +8,13 @@ import com.gmail.guitaekm.technoenderling.enderling_structure.LinkGeneratedEnder
 import com.gmail.guitaekm.technoenderling.gui.TeleportScreenFactory;
 import com.gmail.guitaekm.technoenderling.networking.HandleLongUseServer;
 import com.gmail.guitaekm.technoenderling.point_of_interest.ModPointsOfInterest;
-import com.gmail.guitaekm.technoenderling.utils.ArbitraryStructure;
-import com.gmail.guitaekm.technoenderling.utils.TeleportParams;
-import com.gmail.guitaekm.technoenderling.utils.VehicleTeleport;
+import com.gmail.guitaekm.technoenderling.enderling_structure.ArbitraryStructure;
+import com.gmail.guitaekm.technoenderling.teleport.TeleportParams;
+import com.gmail.guitaekm.technoenderling.teleport.VehicleTeleport;
 import com.gmail.guitaekm.technoenderling.worldgen.ModWorlds;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -36,7 +33,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 public class EnderworldPortalBlock extends Block implements HandleLongUseServer.Listener {

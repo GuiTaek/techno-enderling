@@ -1,9 +1,8 @@
-package com.gmail.guitaekm.technoenderling.utils;
+package com.gmail.guitaekm.technoenderling.enderling_structure;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.*;
-import net.minecraft.server.world.ServerWorld;
 import net.minecraft.tag.Tag;
 import net.minecraft.tag.TagManager;
 import net.minecraft.util.math.BlockPos;

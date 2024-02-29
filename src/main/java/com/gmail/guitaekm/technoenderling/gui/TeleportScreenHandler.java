@@ -9,8 +9,8 @@ import com.gmail.guitaekm.technoenderling.enderling_structure.EnderlingStructure
 import com.gmail.guitaekm.technoenderling.networking.ModNetworking;
 import com.gmail.guitaekm.technoenderling.networking.RequestNetherTeleport;
 import com.gmail.guitaekm.technoenderling.networking.TeleportDestinations;
-import com.gmail.guitaekm.technoenderling.utils.TeleportParams;
-import com.gmail.guitaekm.technoenderling.utils.VehicleTeleport;
+import com.gmail.guitaekm.technoenderling.teleport.TeleportParams;
+import com.gmail.guitaekm.technoenderling.teleport.VehicleTeleport;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;

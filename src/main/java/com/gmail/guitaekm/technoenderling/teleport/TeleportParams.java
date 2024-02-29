@@ -1,4 +1,4 @@
-package com.gmail.guitaekm.technoenderling.utils;
+package com.gmail.guitaekm.technoenderling.teleport;
 
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;

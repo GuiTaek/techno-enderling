@@ -1,6 +1,6 @@
 package com.gmail.guitaekm.technoenderling.networking;
 
-import com.gmail.guitaekm.technoenderling.utils.VehicleTeleport;
+import com.gmail.guitaekm.technoenderling.teleport.VehicleTeleport;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.PacketByteBuf;

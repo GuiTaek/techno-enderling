@@ -8,7 +8,7 @@ import com.gmail.guitaekm.technoenderling.point_of_interest.ModPointsOfInterest;
 import com.gmail.guitaekm.technoenderling.resources.ModResourcesServer;
 import com.gmail.guitaekm.technoenderling.event.ModEventsServer;
 import com.gmail.guitaekm.technoenderling.networking.ModNetworking;
-import com.gmail.guitaekm.technoenderling.utils.VehicleTeleport;
+import com.gmail.guitaekm.technoenderling.teleport.VehicleTeleport;
 import com.gmail.guitaekm.technoenderling.worldgen.RegisterModStructures;
 import net.fabricmc.api.DedicatedServerModInitializer;
 

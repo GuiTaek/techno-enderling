@@ -1,20 +1,16 @@
-package com.gmail.guitaekm.technoenderling.utils;
+package com.gmail.guitaekm.technoenderling.teleport;
 
 import com.gmail.guitaekm.technoenderling.TechnoEnderling;
 import com.gmail.guitaekm.technoenderling.blocks.TreeTraverser;
 import com.gmail.guitaekm.technoenderling.networking.ModNetworking;
 import com.gmail.guitaekm.technoenderling.networking.WaitMountingPacket;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.SpawnRestriction;
 import net.minecraft.network.PacketByteBuf;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ChunkTicketType;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.*;
 import net.minecraft.world.SpawnHelper;

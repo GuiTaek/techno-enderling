@@ -9,7 +9,7 @@ import com.gmail.guitaekm.technoenderling.networking.ModNetworking;
 import com.gmail.guitaekm.technoenderling.particle.ModParticles;
 import com.gmail.guitaekm.technoenderling.particle.custom.EnderworldParticle;
 import com.gmail.guitaekm.technoenderling.resources.ModResourcesClient;
-import com.gmail.guitaekm.technoenderling.utils.RegisterUtils;
+import com.gmail.guitaekm.technoenderling.teleport.RegisterUtils;
 import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry;
 
 public class TechnoEnderlingClient {

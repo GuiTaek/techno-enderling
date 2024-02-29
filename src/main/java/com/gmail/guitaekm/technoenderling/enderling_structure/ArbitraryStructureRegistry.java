@@ -1,7 +1,6 @@
 package com.gmail.guitaekm.technoenderling.enderling_structure;
 
 import com.gmail.guitaekm.technoenderling.TechnoEnderling;
-import com.gmail.guitaekm.technoenderling.utils.ArbitraryStructure;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;

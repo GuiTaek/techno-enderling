@@ -4,7 +4,7 @@ import com.gmail.guitaekm.technoenderling.TechnoEnderling;
 import com.gmail.guitaekm.technoenderling.blocks.EnderworldPortalBlock;
 import com.gmail.guitaekm.technoenderling.event.EnderlingStructureEvents;
 import com.gmail.guitaekm.technoenderling.items.ModItems;
-import com.gmail.guitaekm.technoenderling.utils.TeleportParams;
+import com.gmail.guitaekm.technoenderling.teleport.TeleportParams;
 import com.gmail.guitaekm.technoenderling.worldgen.ModWorlds;
 import com.google.common.collect.Sets;
 import net.minecraft.block.Block;

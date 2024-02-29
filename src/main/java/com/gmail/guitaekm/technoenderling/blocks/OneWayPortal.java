@@ -2,8 +2,8 @@ package com.gmail.guitaekm.technoenderling.blocks;
 
 import com.gmail.guitaekm.technoenderling.TechnoEnderling;
 import com.gmail.guitaekm.technoenderling.networking.HandleLongUseServer;
-import com.gmail.guitaekm.technoenderling.utils.TeleportParams;
-import com.gmail.guitaekm.technoenderling.utils.VehicleTeleport;
+import com.gmail.guitaekm.technoenderling.teleport.TeleportParams;
+import com.gmail.guitaekm.technoenderling.teleport.VehicleTeleport;
 import com.gmail.guitaekm.technoenderling.worldgen.ModWorlds;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.minecraft.block.Block;
@@ -13,7 +13,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.world.BlockView;
 import net.minecraft.world.Heightmap;
 
 public class OneWayPortal extends Block implements HandleLongUseServer.Listener {
