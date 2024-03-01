@@ -1,6 +1,0 @@
-{
-  "parent": "minecraft:block/cube_all",
-  "textures": {
-    "all": "technoenderling:block/pocket_portal_block"
-  }
-}

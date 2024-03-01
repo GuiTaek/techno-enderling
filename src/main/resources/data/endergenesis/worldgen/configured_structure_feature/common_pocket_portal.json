@@ -1,0 +1,7 @@
+{
+  "config": {
+    "start_pool": "endergenesis:pocket_portal",
+    "size": 7
+  },
+  "type": "endergenesis:common_pocket_portal"
+}

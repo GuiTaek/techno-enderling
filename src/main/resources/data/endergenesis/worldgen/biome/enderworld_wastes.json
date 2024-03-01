@@ -1,0 +1,43 @@
+{
+  "depth": 0.1,
+  "scale": 0.2,
+  "precipitation": "none",
+  "category": "none",
+  "temperature": 0.5,
+  "temperature_modifier": "none",
+  "downfall": 0.5,
+  "creature_spawn_probability": 0.0,
+  "effects": {
+    "fog_color": 8025320,
+    "sky_color": 4010652,
+    "water_color": 3866869,
+    "water_fog_color": 4595418,
+    "grass_color_modifier": "none",
+    "particle": {
+      "options": {
+        "type": "endergenesis:enderworld"
+      },
+      "probability": 0.0003
+    }
+  },
+  "carvers": {
+    "air": [],
+    "liquid": []
+  },
+  "features": [
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [
+      "endergenesis:warped_fungi_wastes"
+    ]
+  ],
+  "spawn_costs": {},
+  "spawners": {}
+}

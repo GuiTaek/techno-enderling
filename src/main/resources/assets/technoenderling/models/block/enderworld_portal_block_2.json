@@ -1,6 +1,0 @@
-{
-  "parent": "minecraft:block/cube_all",
-  "textures": {
-    "all": "technoenderling:block/enderworld_portal_block_2"
-  }
-}

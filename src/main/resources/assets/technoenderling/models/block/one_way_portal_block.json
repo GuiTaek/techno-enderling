@@ -1,6 +1,0 @@
-{
-  "parent": "minecraft:block/cube_all",
-  "textures": {
-    "all": "technoenderling:block/one_way_portal_block"
-  }
-}

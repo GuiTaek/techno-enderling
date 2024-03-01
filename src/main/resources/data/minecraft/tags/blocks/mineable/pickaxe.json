@@ -1,8 +1,8 @@
 {
   "replace": false,
   "values": [
-    "technoenderling:infused_gold_block",
-    "technoenderling:enderworld_portal_block_2",
-    "technoenderling:enderworld_portal_block_3"
+    "endergenesis:infused_gold_block",
+    "endergenesis:enderworld_portal_block_2",
+    "endergenesis:enderworld_portal_block_3"
   ]
 }

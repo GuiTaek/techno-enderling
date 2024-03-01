@@ -1,7 +1,0 @@
-{
-  "config": {
-    "start_pool": "technoenderling:enderworld_portal",
-    "size": 7
-  },
-  "type": "technoenderling:enderworld_portal"
-}

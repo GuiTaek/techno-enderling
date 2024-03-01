@@ -1,8 +1,8 @@
 {
 	"schemaVersion": 1,
-	"id": "technoenderling",
+	"id": "endergenesis",
 	"version": "${version}",
-	"name": "technoenderling",
+	"name": "endergenesis",
 	"description": "This is an example description! Tell everyone what your mod is about!",
 	"authors": [
 		"Me!"
@@ -11,15 +11,15 @@
 		"homepage": "https://fabricmc.net/",
 		"sources": "https://github.com/FabricMC/fabric-example-mod"
 	},
-	"license": "CC0-1.0",
+	"license": "MIT",
 	"icon": "assets/technoenderling/icon.png",
 	"environment": "*",
 	"entrypoints": {
 		"server": [
-			"com.gmail.guitaekm.technoenderling.TechnoEnderlingServer"
+			"com.gmail.guitaekm.endergenesis.EnderGenesisServer"
 		],
 		"main": [
-			"com.gmail.guitaekm.technoenderling.TechnoEnderling"
+			"com.gmail.guitaekm.endergenesis.EnderGenesis"
 		],
 		"client": []
 	},

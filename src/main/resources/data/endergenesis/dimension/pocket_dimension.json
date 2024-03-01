@@ -1,0 +1,23 @@
+{
+  "generator": {
+    "type": "minecraft:flat",
+    "settings": {
+      "structures": {
+        "structures": {
+        }
+      },
+      "layers": [
+        {
+          "block": "minecraft:bedrock",
+          "height": 1
+        },
+        {
+          "block": "minecraft:barrier",
+          "height": 64
+        }
+      ],
+      "biome": "endergenesis:pocket_dimension"
+    }
+  },
+  "type": "endergenesis:pocket_dimension"
+}

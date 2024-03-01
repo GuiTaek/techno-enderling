@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "endergenesis:block/enderworld_portal_block_1"
+  }
+}
