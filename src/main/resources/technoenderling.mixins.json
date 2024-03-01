@@ -1,13 +1,14 @@
 {
-	"required": true,
-	"package": "com.gmail.guitaekm.technoenderling.mixin",
-	"compatibilityLevel": "JAVA_17",
-	"mixins": [
-		"ServerPlayerEntityMixin",
-		"ServerPlayerNetherEnderworldPortalMixin",
-		"MouseMixin"
-	],
-	"injectors": {
-		"defaultRequire": 1
+  "required": true,
+  "package": "com.gmail.guitaekm.technoenderling.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "ChunkTicketManagerMixin",
+    "MouseMixin",
+    "ServerPlayerEntityMixin",
+    "ServerPlayerNetherEnderworldPortalMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
 	}
 }

@@ -8,5 +8,7 @@ public class ModEventsServer {
     public static void registerEvents() {
         ServerTickEvents.END_SERVER_TICK.register(new DarknessApplierServer());
         new LinkEnderworldPortals().register();
+        // register is inside the constructor
+        new PortalPropagation();
     }
 }

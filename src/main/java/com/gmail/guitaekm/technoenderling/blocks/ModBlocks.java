@@ -2,7 +2,9 @@ package com.gmail.guitaekm.technoenderling.blocks;
 
 import com.gmail.guitaekm.technoenderling.TechnoEnderling;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
+import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.minecraft.block.*;
+import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.EntityType;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.util.Identifier;
@@ -54,6 +56,13 @@ public class ModBlocks {
             3,
             true,
             ModBlocks.INFUSED_GOLD_BLOCK
+    );
+    public static final BlockEntityType<EnderworldPortalBlockEntity> ENDERWORLD_PORTAL_BLOCK_ENTITY_BLOCK_ENTITY = Registry.register(
+            Registry.BLOCK_ENTITY_TYPE,
+            new Identifier(TechnoEnderling.MOD_ID, "enderworld_portal_block_entity"),
+            FabricBlockEntityTypeBuilder
+                    .create(EnderworldPortalBlockEntity::new, ENDERWORLD_PORTAL_BLOCK_3)
+                    .build()
     );
     public static final PocketPortalBlock POCKET_PORTAL_BLOCK = new PocketPortalBlock(
             FabricBlockSettings

@@ -11,6 +11,16 @@ import org.jetbrains.annotations.Nullable;
 import org.lwjgl.system.CallbackI;
 
 public class ModWorlds {
+
+    public static RegistryKey<World> enderworldKey = RegistryKey.of(
+            Registry.WORLD_KEY,
+            new Identifier(TechnoEnderling.MOD_ID, "enderworld")
+    );
+
+    public static RegistryKey<World> pocketDimensionKey = RegistryKey.of(
+            Registry.WORLD_KEY,
+            new Identifier(TechnoEnderling.MOD_ID, "pocket_dimension")
+    );
     public record LazyInformation(
             ServerWorld enderworld,
             ServerWorld pocketDimension,
@@ -18,14 +28,6 @@ public class ModWorlds {
             RegistryKey<World> pocketDimensionKey
     ) { }
     public static LazyInformation getInfo(MinecraftServer server) {
-        RegistryKey<World> enderworldKey = RegistryKey.of(
-                Registry.WORLD_KEY,
-                new Identifier(TechnoEnderling.MOD_ID, "enderworld")
-        );
-        RegistryKey<World> pocketDimensionKey = RegistryKey.of(
-                Registry.WORLD_KEY,
-                new Identifier(TechnoEnderling.MOD_ID, "pocket_dimension")
-        );
         ServerWorld enderworld = server.getWorld(enderworldKey);
         ServerWorld pocketDimension = server.getWorld(pocketDimensionKey);
         return new LazyInformation(enderworld, pocketDimension, enderworldKey, pocketDimensionKey);

@@ -5,6 +5,7 @@ import com.gmail.guitaekm.technoenderling.access.IServerPlayerNetherEnderworldPo
 import com.gmail.guitaekm.technoenderling.enderling_structure.EnderlingStructure;
 import com.gmail.guitaekm.technoenderling.enderling_structure.EnderlingStructureInitializer;
 import com.gmail.guitaekm.technoenderling.enderling_structure.LinkGeneratedEnderworldPortal;
+import com.gmail.guitaekm.technoenderling.event.PortalPropagation;
 import com.gmail.guitaekm.technoenderling.gui.TeleportScreenFactory;
 import com.gmail.guitaekm.technoenderling.networking.HandleLongUseServer;
 import com.gmail.guitaekm.technoenderling.point_of_interest.ModPointsOfInterest;
@@ -13,8 +14,10 @@ import com.gmail.guitaekm.technoenderling.teleport.TeleportParams;
 import com.gmail.guitaekm.technoenderling.teleport.VehicleTeleport;
 import com.gmail.guitaekm.technoenderling.worldgen.ModWorlds;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
+import net.minecraft.block.*;
+import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.block.entity.BlockEntityTicker;
+import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -35,7 +38,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.stream.Stream;
 
-public class EnderworldPortalBlock extends Block implements HandleLongUseServer.Listener {
+public class EnderworldPortalBlock extends BlockWithEntity implements HandleLongUseServer.Listener, BlockEntityProvider {
     // configure
     public static final int[][] RESPAWN_LAYERS = {
             {1, 1, 0},
@@ -67,6 +70,25 @@ public class EnderworldPortalBlock extends Block implements HandleLongUseServer.
             new Identifier("minecraft:overworld"),
             new Identifier("minecraft:the_nether")
     );
+
+    @Nullable
+    @Override
+    public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
+        return new EnderworldPortalBlockEntity(pos, state);
+    }
+
+    @Override
+    public BlockRenderType getRenderType(BlockState state) {
+        // With inheriting from BlockWithEntity this defaults to INVISIBLE, so we need to change that!
+        return BlockRenderType.MODEL;
+    }
+    @Nullable
+    @Override
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
+        return checkType(type, ModBlocks.ENDERWORLD_PORTAL_BLOCK_ENTITY_BLOCK_ENTITY,
+                EnderworldPortalBlockEntity::tick);
+    }
+
     public static class LazyInformation {
         public ServerWorld enderworld;
         public int dimensionScaleInverse;
@@ -438,7 +460,8 @@ public class EnderworldPortalBlock extends Block implements HandleLongUseServer.
             super.onBroken(world, pos, state);
             return;
         }
-        removeNetherDestination(world.getServer(), world, pos);
+        MinecraftServer server = Objects.requireNonNull(world.getServer());
+        removeNetherDestination(server, world, pos);
         super.onBroken(world, pos, state);
     }
 
