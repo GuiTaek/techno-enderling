@@ -164,11 +164,11 @@ public class EnderworldPortalBlock extends BlockWithEntity implements HandleLong
             // configure
             BlockPos toAddToDestinations = portalPosOptional.get().add(0, 2, 0);
             EnderworldPortalBlock.NetherInstance source = ((IServerPlayerNetherEnderworldPortal)player)
-                    .techno_enderling$addIfNotPresent(toAddToDestinations);
-            ((IServerPlayerNetherEnderworldPortal)player).techno_enderling$setSource(source);
+                    .endergenesis$addIfNotPresent(toAddToDestinations);
+            ((IServerPlayerNetherEnderworldPortal)player).endergenesis$setSource(source);
             player.openHandledScreen(new TeleportScreenFactory());
             // it's probably better to remove the source after the screen
-            ((IServerPlayerNetherEnderworldPortal)player).techno_enderling$setSource(null);
+            ((IServerPlayerNetherEnderworldPortal)player).endergenesis$setSource(null);
             return;
         }
         if(player.getWorld().getBlockState(pos).get(GENERATED)) {
@@ -474,7 +474,7 @@ public class EnderworldPortalBlock extends BlockWithEntity implements HandleLong
         boolean isNether = world.getDimension().equals(nether.getDimension());
         if (isNether) {
             server.getPlayerManager().getPlayerList().forEach(
-                    arbitraryPlayer -> ((IServerPlayerNetherEnderworldPortal)arbitraryPlayer).techno_nederling$remove(pos)
+                    arbitraryPlayer -> ((IServerPlayerNetherEnderworldPortal)arbitraryPlayer).endergenesis$remove(pos)
             );
         }
     }

@@ -65,24 +65,24 @@ public class RenamingScreenHandler extends ScreenHandler implements ServerPlayNe
         IServerPlayerNetherEnderworldPortal playerEnderworldPortal = (IServerPlayerNetherEnderworldPortal)player;
         AnswerRenamingRequest packet = new AnswerRenamingRequest(buf);
         if (packet.button == AnswerRenamingRequest.ButtonPressed.OK) {
-            playerEnderworldPortal.techno_enderling$setName(this.currName, packet.newName);
+            playerEnderworldPortal.endergenesis$setName(this.currName, packet.newName);
             EnderworldPortalBlock.NetherInstance instance = playerEnderworldPortal
-                    .techno_enderling$getDestinations()
+                    .endergenesis$getDestinations()
                     .stream()
                     .filter(checkInstance ->
                             checkInstance.pos().equals(this.pos)).findFirst().orElse(null);
-            playerEnderworldPortal.techno_enderling$setSource(instance);
+            playerEnderworldPortal.endergenesis$setSource(instance);
         }
         if (packet.button == AnswerRenamingRequest.ButtonPressed.FORGET) {
-            playerEnderworldPortal.techno_enderling$removeWithName(this.currName);
+            playerEnderworldPortal.endergenesis$removeWithName(this.currName);
         }
         if (packet.button == AnswerRenamingRequest.ButtonPressed.CANCEL) {
             EnderworldPortalBlock.NetherInstance instance = playerEnderworldPortal
-                    .techno_enderling$getDestinations()
+                    .endergenesis$getDestinations()
                     .stream()
                     .filter(checkInstance ->
                             checkInstance.pos().equals(this.pos)).findFirst().orElse(null);
-            playerEnderworldPortal.techno_enderling$setSource(instance);
+            playerEnderworldPortal.endergenesis$setSource(instance);
         }
         player.openHandledScreen(new TeleportScreenFactory());
         ServerPlayNetworking.unregisterReceiver(player.networkHandler, ModNetworking.ANSWER_RENAMING_REQUEST);

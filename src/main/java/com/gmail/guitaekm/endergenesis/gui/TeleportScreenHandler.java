@@ -160,8 +160,8 @@ public class TeleportScreenHandler extends ScreenHandler implements ServerPlayNe
     // or even that this is inside ScreenHandler
     public static Pair<EnderworldPortalBlock.NetherInstance, List<EnderworldPortalBlock.NetherInstance>>
     getPlayerStoredPortals(ServerPlayerEntity player) {
-        EnderworldPortalBlock.NetherInstance source = ((IServerPlayerNetherEnderworldPortal)player).techno_enderling$getSource();
-        List<EnderworldPortalBlock.NetherInstance> destinations = ((IServerPlayerNetherEnderworldPortal)player).techno_enderling$getDestinations();
+        EnderworldPortalBlock.NetherInstance source = ((IServerPlayerNetherEnderworldPortal)player).endergenesis$getSource();
+        List<EnderworldPortalBlock.NetherInstance> destinations = ((IServerPlayerNetherEnderworldPortal)player).endergenesis$getDestinations();
         return new Pair<>(source, destinations);
     }
 }

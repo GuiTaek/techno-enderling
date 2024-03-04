@@ -17,12 +17,12 @@ public class ServerPlayerEntityMixin implements IServerPlayerEntityAccess {
     private @Nullable BlockPos lastUsedPocketPortal = null;
 
     @Override
-    public void techno_enderling$setLastUsedPocketPortal(@Nullable BlockPos position) {
+    public void endergenesis$setLastUsedPocketPortal(@Nullable BlockPos position) {
         this.lastUsedPocketPortal = position;
     }
 
     @Override
-    public @Nullable BlockPos techno_enderling$getLastUsedPocketPortal() {
+    public @Nullable BlockPos endergenesis$getLastUsedPocketPortal() {
         return this.lastUsedPocketPortal;
     }
 

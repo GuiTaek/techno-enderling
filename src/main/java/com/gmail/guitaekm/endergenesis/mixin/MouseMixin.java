@@ -5,20 +5,22 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.Mouse;
 import net.minecraft.client.gui.screen.Screen;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Mixin(Mouse.class)
 public class MouseMixin implements IMouseMixin {
+    @Unique
     protected boolean keepScreen;
 
     @Override
-    public void setKeepScreen() {
+    public void endergenesis$setKeepScreen() {
         this.keepScreen = true;
     }
 
     @Override
-    public void unsetKeepScreen() {
+    public void endergenesis$unsetKeepScreen() {
         this.keepScreen = false;
     }
 

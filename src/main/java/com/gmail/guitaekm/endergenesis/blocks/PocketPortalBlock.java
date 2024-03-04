@@ -92,13 +92,13 @@ public class PocketPortalBlock extends Block implements HandleLongUseServer.List
                 .STRUCTURE_FEATURE
                 .get(new Identifier(EnderGenesis.MOD_ID, "rare_pocket_portal"));
         if (player.getWorld().getRegistryKey().equals(info.pocketDimensionKey())) {
-            BlockPos targetPos = ((IServerPlayerEntityAccess)(Object)player).techno_enderling$getLastUsedPocketPortal();
+            BlockPos targetPos = ((IServerPlayerEntityAccess)(Object)player).endergenesis$getLastUsedPocketPortal();
             if (targetPos == null) {
                 EnderGenesis.LOGGER.warn("Tried to leave the pocket dimension two times in the row. The player likely used another teleportation method");
                 // todo: spawn the player at spawn
                 return;
             }
-            ((IServerPlayerEntityAccess) player).techno_enderling$setLastUsedPocketPortal(null);
+            ((IServerPlayerEntityAccess) player).endergenesis$setLastUsedPocketPortal(null);
             if (!info.enderworld().getStructureAccessor().getStructureAt(targetPos, rarePocketPortal).hasChildren()) {
                 if (!info.enderworld().getStructureAccessor().getStructureAt(targetPos, commonPocketPortal).hasChildren()) {
                     EnderGenesis.LOGGER.warn("corrupted player data");
@@ -109,7 +109,7 @@ public class PocketPortalBlock extends Block implements HandleLongUseServer.List
             PocketPortalBlock.pocketPortalTeleport(info.enderworld(), player, pocketPortal, targetPos);
 
         } else if (player.getWorld().getRegistryKey().equals(info.enderworldKey())) {
-            ((IServerPlayerEntityAccess) player).techno_enderling$setLastUsedPocketPortal(pos.up());
+            ((IServerPlayerEntityAccess) player).endergenesis$setLastUsedPocketPortal(pos.up());
             // the position should be different for each player and depend on the seed and the hash value of the player name
             this.preparePocketDimension(info.pocketDimension(), new BlockPos(0, 0, 0));
             PocketPortalBlock.pocketPortalTeleport(info.pocketDimension(), player, pocketPortal, new BlockPos(0, 5, 0));

@@ -7,14 +7,14 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 public interface IServerPlayerNetherEnderworldPortal {
-    void techno_nederling$remove(BlockPos pos);
-    void techno_enderling$remove(EnderworldPortalBlock.NetherInstance portal);
-    void techno_enderling$add(EnderworldPortalBlock.NetherInstance portal);
-    List<EnderworldPortalBlock.NetherInstance> techno_enderling$getDestinations();
-    void techno_enderling$setSource(@Nullable EnderworldPortalBlock.NetherInstance source);
-    EnderworldPortalBlock.NetherInstance techno_enderling$addIfNotPresent(BlockPos pos);
-    @Nullable EnderworldPortalBlock.NetherInstance techno_enderling$getSource();
-    void techno_enderling$setName(String currName, String newName);
-    void techno_enderling$removeWithName(String name);
+    void endergenesis$remove(BlockPos pos);
+    void endergenesis$remove(EnderworldPortalBlock.NetherInstance portal);
+    void endergenesis$add(EnderworldPortalBlock.NetherInstance portal);
+    List<EnderworldPortalBlock.NetherInstance> endergenesis$getDestinations();
+    void endergenesis$setSource(@Nullable EnderworldPortalBlock.NetherInstance source);
+    EnderworldPortalBlock.NetherInstance endergenesis$addIfNotPresent(BlockPos pos);
+    @Nullable EnderworldPortalBlock.NetherInstance endergenesis$getSource();
+    void endergenesis$setName(String currName, String newName);
+    void endergenesis$removeWithName(String name);
 
 }

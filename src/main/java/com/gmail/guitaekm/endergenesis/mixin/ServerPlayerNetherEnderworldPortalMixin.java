@@ -35,32 +35,32 @@ public class ServerPlayerNetherEnderworldPortalMixin implements IServerPlayerNet
     private EnderworldPortalBlock.NetherInstance source = null;
 
     @Override
-    public void techno_nederling$remove(BlockPos pos) {
+    public void endergenesis$remove(BlockPos pos) {
         this.savedDestinations.removeIf(instance -> instance.pos().equals(pos));
     }
 
     @Override
-    public void techno_enderling$remove(EnderworldPortalBlock.NetherInstance portal) {
+    public void endergenesis$remove(EnderworldPortalBlock.NetherInstance portal) {
         this.savedDestinations.remove(portal);
     }
 
     @Override
-    public void techno_enderling$add(EnderworldPortalBlock.NetherInstance portal) {
+    public void endergenesis$add(EnderworldPortalBlock.NetherInstance portal) {
         this.savedDestinations.add(portal);
     }
 
     @Override
-    public List<EnderworldPortalBlock.NetherInstance> techno_enderling$getDestinations() {
+    public List<EnderworldPortalBlock.NetherInstance> endergenesis$getDestinations() {
         return this.savedDestinations;
     }
 
     @Override
-    public void techno_enderling$setSource(EnderworldPortalBlock.@Nullable NetherInstance source) {
+    public void endergenesis$setSource(EnderworldPortalBlock.@Nullable NetherInstance source) {
         this.source = source;
     }
 
     @Override
-    public EnderworldPortalBlock.NetherInstance techno_enderling$addIfNotPresent(BlockPos pos) {
+    public EnderworldPortalBlock.NetherInstance endergenesis$addIfNotPresent(BlockPos pos) {
         List<EnderworldPortalBlock.NetherInstance> possibleInstances = this.savedDestinations
                 .stream()
                 .filter(instance -> pos.equals(instance.pos()))
@@ -109,12 +109,12 @@ public class ServerPlayerNetherEnderworldPortalMixin implements IServerPlayerNet
     }
 
     @Override
-    public @Nullable EnderworldPortalBlock.NetherInstance techno_enderling$getSource() {
+    public @Nullable EnderworldPortalBlock.NetherInstance endergenesis$getSource() {
         return this.source;
     }
 
     @Override
-    public void techno_enderling$setName(String currName, String newName) {
+    public void endergenesis$setName(String currName, String newName) {
         if (!this.savedDestinations.stream().filter(
                 instance -> instance.name().equals(newName)
         ).toList().isEmpty()) {
@@ -134,7 +134,7 @@ public class ServerPlayerNetherEnderworldPortalMixin implements IServerPlayerNet
     }
 
     @Override
-    public void techno_enderling$removeWithName(String name) {
+    public void endergenesis$removeWithName(String name) {
         this.savedDestinations.removeIf(instance -> instance.name().equals(name));
     }
 

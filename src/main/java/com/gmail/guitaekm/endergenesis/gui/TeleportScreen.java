@@ -269,8 +269,8 @@ public class TeleportScreen extends HandledScreen<TeleportScreenHandler> impleme
             return;
         }
         // temporarily here
-        ((IMouseMixin) MinecraftClient.getInstance().mouse).setKeepScreen();
+        ((IMouseMixin) MinecraftClient.getInstance().mouse).endergenesis$setKeepScreen();
         MinecraftClient.getInstance().mouse.lockCursor();
-        ((IMouseMixin) MinecraftClient.getInstance().mouse).unsetKeepScreen();
+        ((IMouseMixin) MinecraftClient.getInstance().mouse).endergenesis$unsetKeepScreen();
     }
 }

@@ -46,7 +46,7 @@ public class PortalPropagation {
                 return;
             }
             List<? extends ChunkTicketType<?>> set = ((IChunkTicketManagerAccess) world.getChunkManager().threadedAnvilChunkStorage.getTicketManager())
-                    .techno_enderling$getTicketSetPublic(new ChunkPos(pos).toLong())
+                    .endergenesis$getTicketSetPublic(new ChunkPos(pos).toLong())
                     .stream()
                     .map(ChunkTicket::getType)
                     .toList();

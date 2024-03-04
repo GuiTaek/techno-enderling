@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.Shadow;
 public abstract class ChunkTicketManagerMixin implements IChunkTicketManagerAccess {
     @Shadow protected abstract SortedArraySet<ChunkTicket<?>> getTicketSet(long position);
 
-    public SortedArraySet<ChunkTicket<?>> techno_enderling$getTicketSetPublic(long position) {
+    public SortedArraySet<ChunkTicket<?>> endergenesis$getTicketSetPublic(long position) {
         return this.getTicketSet(position);
     }
 }
