@@ -8,9 +8,12 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.SpawnRestriction;
+import net.minecraft.entity.mob.PathAwareEntity;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ChunkTicketType;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.*;
 import net.minecraft.world.SpawnHelper;
@@ -110,6 +113,14 @@ public class VehicleTeleport {
             entity.setBodyYaw(entity.getYaw());
             oldEntity.setRemoved(Entity.RemovalReason.CHANGED_DIMENSION);
             targetWorld.onDimensionChanged(entity);
+        }
+        if (!(entity instanceof LivingEntity) || !((LivingEntity)entity).isFallFlying()) {
+            entity.setVelocity(entity.getVelocity().multiply(1.0, 0.0, 1.0));
+            entity.setOnGround(true);
+        }
+
+        if (entity instanceof PathAwareEntity) {
+            ((PathAwareEntity)entity).getNavigation().stop();
         }
         return entity;
     }
