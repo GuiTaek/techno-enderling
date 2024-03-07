@@ -22,9 +22,12 @@ import net.minecraft.util.math.Vec3i;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.gen.feature.StructureFeature;
 
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 import java.util.Set;
+import java.security.MessageDigest;
 
 public class PocketPortalBlock extends Block implements HandleLongUseServer.Listener {
     // these will be configured through arbitrary structures -- it's just not implemented yet
@@ -67,6 +70,11 @@ public class PocketPortalBlock extends Block implements HandleLongUseServer.List
             new Vec3i(16, 8, 16)
     );
     // configure
+    // this number gives more space than the current server with the most players
+    public static int POCKET_DIMENSION_SPREAD = 100_000;
+    // configure
+    public static int POCKET_DIMENSION_RADIUS = 20;
+    // configure
     public static double DROP_CHANCE = 0.8;
     public PocketPortalBlock(Settings settings) {
         super(settings);
@@ -92,7 +100,7 @@ public class PocketPortalBlock extends Block implements HandleLongUseServer.List
                 .STRUCTURE_FEATURE
                 .get(new Identifier(EnderGenesis.MOD_ID, "rare_pocket_portal"));
         if (player.getWorld().getRegistryKey().equals(info.pocketDimensionKey())) {
-            BlockPos targetPos = ((IServerPlayerEntityAccess)(Object)player).endergenesis$getLastUsedPocketPortal();
+            BlockPos targetPos = ((IServerPlayerEntityAccess) player).endergenesis$getLastUsedPocketPortal();
             if (targetPos == null) {
                 EnderGenesis.LOGGER.warn("Tried to leave the pocket dimension two times in the row. The player likely used another teleportation method");
                 // todo: spawn the player at spawn
@@ -111,6 +119,8 @@ public class PocketPortalBlock extends Block implements HandleLongUseServer.List
         } else if (player.getWorld().getRegistryKey().equals(info.enderworldKey())) {
             ((IServerPlayerEntityAccess) player).endergenesis$setLastUsedPocketPortal(pos.up());
             // the position should be different for each player and depend on the seed and the hash value of the player name
+            // actually, the idea/comment explained directly above isn't good because of the birthday paradox.
+            // It should be saved in the world and a free space should be chosen
             this.preparePocketDimension(info.pocketDimension(), new BlockPos(0, 0, 0));
             PocketPortalBlock.pocketPortalTeleport(info.pocketDimension(), player, pocketPortal, new BlockPos(0, 5, 0));
         } else {
@@ -202,18 +212,18 @@ public class PocketPortalBlock extends Block implements HandleLongUseServer.List
                 portalSize.getY(),
                 Math.floorDiv(portalSize.getZ() - 1, 2)
         );
-        Vec3i radiusses = getPocketDimensionDimensions(pocketDimension, pos.add(0, 4, 0));
+        Vec3i radius = getPocketDimensionDimensions(pocketDimension, pos.add(0, 4, 0));
         // configure
-        for (int x = -20; x <= 20; x++) {
-            for (int z = -20; z <= 20; z++) {
+        for (int x = -POCKET_DIMENSION_RADIUS; x <= POCKET_DIMENSION_RADIUS; x++) {
+            for (int z = -POCKET_DIMENSION_RADIUS; z <= POCKET_DIMENSION_RADIUS; z++) {
                 {
                     int y = 0;
                     pocketDimension.setBlockState(pos.add(x, y, z), Blocks.BEDROCK.getDefaultState());
                 }
-                for (int y = 1; y <= 20; y++) {
-                    if (-radiusses.getX() <= x && x <= radiusses.getX()
-                            && -radiusses.getZ() <= z && z <= radiusses.getZ()
-                            && y <= radiusses.getY()) {
+                for (int y = 1; y <= POCKET_DIMENSION_RADIUS; y++) {
+                    if (-radius.getX() <= x && x <= radius.getX()
+                            && -radius.getZ() <= z && z <= radius.getZ()
+                            && y <= radius.getY()) {
                         continue;
                     }
                     if (-portalRadiusses.getX() <= x && x <= portalRadiusses.getX()
@@ -226,13 +236,27 @@ public class PocketPortalBlock extends Block implements HandleLongUseServer.List
                         }
                         continue;
                     }
+                    Vec3i biggestDim = WARD_POWERS.get(WARD_POWERS.size() - 1);
+                    int xRadiusBedrock = biggestDim.getX() + 1;
+                    int yRadiusBedrock = Math.max(portalSize.getY(), biggestDim.getY()) + 1;
+                    int zRadiusBedrock = biggestDim.getZ() + 1;
+                    if (
+                            x >= xRadiusBedrock
+                            || x <= -xRadiusBedrock
+                            || y >= yRadiusBedrock
+                            || z >= zRadiusBedrock
+                            || z <= -zRadiusBedrock
+                    ) {
+                        pocketDimension.setBlockState(pos.add(x, y, z), Blocks.BEDROCK.getDefaultState(), Block.NOTIFY_LISTENERS);
+                        continue;
+                    }
                     pocketDimension.setBlockState(pos.add(x, y, z), Blocks.BARRIER.getDefaultState());
                 }
             }
         }
-        for (int x = -radiusses.getX(); x <= radiusses.getX(); x++) {
-            for (int z = -radiusses.getZ(); z <= radiusses.getZ(); z++) {
-                for (int y = 1; y <= radiusses.getY(); y++) {
+        for (int x = -radius.getX(); x <= radius.getX(); x++) {
+            for (int z = -radius.getZ(); z <= radius.getZ(); z++) {
+                for (int y = 1; y <= radius.getY(); y++) {
                     if (pocketDimension.getBlockState(pos.add(x, y, z)).getBlock().equals(Blocks.BARRIER)) {
                         pocketDimension.setBlockState(pos.add(x, y, z), Blocks.AIR.getDefaultState());
                     }

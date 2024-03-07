@@ -1,9 +1,9 @@
 {
   "fixed_time" : 6000,
-  "has_skylight": true,
+  "has_skylight": false,
   "has_ceiling": false,
   "ultrawarm": false,
-  "natural": true,
+  "natural": false,
   "coordinate_scale": 1.0,
   "piglin_safe" : false,
   "bed_works" : false,
@@ -13,6 +13,6 @@
   "height": 256,
   "logical_height": 128,
   "infiniburn": "minecraft:infiniburn_overworld",
-  "ambient_light": 0.0,
+  "ambient_light": 1.0,
   "effects": "minecraft:end"
 }
