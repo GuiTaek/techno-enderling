@@ -207,7 +207,7 @@ public class ModStructureFeatures {
                 .defaultConfig(new StructureConfig(
                         12, /* average distance apart in chunks between spawn attempts */
                         8, /* minimum distance apart in chunks between spawn attempts. MUST BE LESS THAN ABOVE VALUE */
-                        791970925 /* this modifies the seed of the structure so no two structures always spawn over each-other. Make this large and unique. */))
+                        1657382463 /* this modifies the seed of the structure so no two structures always spawn over each-other. Make this large and unique. */))
 
                 /*
                  * Whether surrounding land will be modified automatically to conform to the bottom of the structure.
