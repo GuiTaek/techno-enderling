@@ -1,12 +1,14 @@
 package com.gmail.guitaekm.endergenesis.blocks;
 
 import com.gmail.guitaekm.endergenesis.EnderGenesis;
+import com.gmail.guitaekm.endergenesis.event.PortalPropagation;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
 
 public class ModBlocks {
@@ -54,7 +56,14 @@ public class ModBlocks {
             true,
             ModBlocks.INFUSED_GOLD_BLOCK
     );
-    public static final BlockEntityType<EnderworldPortalBlockEntity> ENDERWORLD_PORTAL_BLOCK_ENTITY_BLOCK_ENTITY = Registry.register(
+    public static final BlockEntityType<EmptyBlockEntity> EMPTY_BLOCK_ENTITY = Registry.register(
+            Registry.BLOCK_ENTITY_TYPE,
+            new Identifier(EnderGenesis.MOD_ID, "empty_block_entity"),
+            FabricBlockEntityTypeBuilder
+                    .create(EmptyBlockEntity::new, ENDERWORLD_PORTAL_BLOCK_1, ENDERWORLD_PORTAL_BLOCK_2)
+                    .build()
+    );
+    public static final BlockEntityType<EnderworldPortalBlockEntity> ENDERWORLD_PORTAL_BLOCK_ENTITY = Registry.register(
             Registry.BLOCK_ENTITY_TYPE,
             new Identifier(EnderGenesis.MOD_ID, "enderworld_portal_block_entity"),
             FabricBlockEntityTypeBuilder
@@ -118,5 +127,6 @@ public class ModBlocks {
         EnderworldPortalBlock.register();
         PocketPortalBlock.register(ModBlocks.POCKET_PORTAL_BLOCK);
         ONE_WAY_PORTAL_BLOCK.registerServer();
+        new PortalPropagation();
     }
 }

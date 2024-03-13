@@ -9,12 +9,18 @@ import net.minecraft.world.World;
 
 public class EnderworldPortalBlockEntity extends BlockEntity {
     public EnderworldPortalBlockEntity(BlockPos pos, BlockState state) {
-        super(ModBlocks.ENDERWORLD_PORTAL_BLOCK_ENTITY_BLOCK_ENTITY, pos, state);
+        super(ModBlocks.ENDERWORLD_PORTAL_BLOCK_ENTITY, pos, state);
     }
-    public static void tick(World world, BlockPos pos, BlockState state, EnderworldPortalBlockEntity entity) {
+    public static void tick(World world, BlockPos pos, BlockState state, BlockEntity entity) {
         if (world.isClient) {
             return;
         }
-        PortalPropagation.propagateEnderworldPortal((ServerWorld) world, world.getWorldChunk(pos), PortalPropagation::loadEnderworldChunk);
+        if (state.getBlock() instanceof EnderworldPortalBlock enderworldPortalBlock) {
+            if (enderworldPortalBlock.index != 3) {
+                assert false;
+                return;
+            }
+            PortalPropagation.propagatePortalTicket((ServerWorld) world, world.getWorldChunk(pos), pos);
+        }
     }
 }

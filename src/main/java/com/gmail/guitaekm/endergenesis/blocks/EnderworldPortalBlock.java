@@ -73,7 +73,13 @@ public class EnderworldPortalBlock extends BlockWithEntity implements HandleLong
     @Nullable
     @Override
     public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
-        return new EnderworldPortalBlockEntity(pos, state);
+        if (this.index == 1 || this.index == 2) {
+            return new EmptyBlockEntity(pos, state);
+        } else if (this.index == 3) {
+            return new EnderworldPortalBlockEntity(pos, state);
+        }
+        assert false;
+        return null;
     }
 
     @Override
@@ -84,8 +90,14 @@ public class EnderworldPortalBlock extends BlockWithEntity implements HandleLong
     @Nullable
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
-        return checkType(type, ModBlocks.ENDERWORLD_PORTAL_BLOCK_ENTITY_BLOCK_ENTITY,
-                EnderworldPortalBlockEntity::tick);
+        if (this.index == 1 || this.index == 2) {
+            return checkType(type, ModBlocks.EMPTY_BLOCK_ENTITY,
+                    EmptyBlockEntity::tick);
+        } else if (this.index == 3) {
+            return checkType(type, ModBlocks.ENDERWORLD_PORTAL_BLOCK_ENTITY, EnderworldPortalBlockEntity::tick);
+        }
+        assert false;
+        return null;
     }
 
     public static class LazyInformation {
