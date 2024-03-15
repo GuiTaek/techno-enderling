@@ -7,15 +7,22 @@ import com.gmail.guitaekm.endergenesis.teleport.VehicleTeleport;
 import com.gmail.guitaekm.endergenesis.worldgen.ModWorlds;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.BlockWithEntity;
+import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.block.entity.BlockEntityTicker;
+import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.Heightmap;
+import net.minecraft.world.World;
+import org.jetbrains.annotations.Nullable;
 
-public class OneWayPortal extends Block implements HandleLongUseServer.Listener {
+public class OneWayPortal extends BlockWithEntity implements HandleLongUseServer.Listener {
     public OneWayPortal(Settings settings) {
         super(settings);
     }
@@ -58,5 +65,23 @@ public class OneWayPortal extends Block implements HandleLongUseServer.Listener 
             return true;
         }
         return super.isSideInvisible(state, stateFrom, direction);
+    }
+
+    @Nullable
+    @Override
+    public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
+        return new OneWayPortalEntity(pos, state);
+    }
+
+    @Nullable
+    @Override
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
+        return checkType(type, ModBlocks.ONE_WAY_PORTAL_ENTITY, OneWayPortalEntity::tick);
+    }
+
+    @Override
+    public BlockRenderType getRenderType(BlockState state) {
+        // With inheriting from BlockWithEntity this defaults to INVISIBLE, so we need to change that!
+        return BlockRenderType.MODEL;
     }
 }

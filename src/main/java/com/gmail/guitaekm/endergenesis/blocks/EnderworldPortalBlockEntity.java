@@ -20,7 +20,7 @@ public class EnderworldPortalBlockEntity extends BlockEntity {
                 assert false;
                 return;
             }
-            PortalPropagation.propagatePortalTicket((ServerWorld) world, world.getWorldChunk(pos), pos);
+            PortalPropagation.propagateEnderworldPortalTicket((ServerWorld) world, world.getWorldChunk(pos), pos);
         }
     }
 }

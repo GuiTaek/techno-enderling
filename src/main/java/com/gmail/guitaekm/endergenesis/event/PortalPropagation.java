@@ -10,21 +10,13 @@ import net.minecraft.server.world.ChunkTicket;
 import net.minecraft.server.world.ChunkTicketType;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.Unit;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.Vec3i;
-import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.WorldChunk;
-import net.minecraft.world.poi.PointOfInterestStorage;
-import org.jetbrains.annotations.Nullable;
-import org.lwjgl.system.CallbackI;
 
 import java.util.*;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 public class PortalPropagation implements ServerTickEvents.EndTick {
     public PortalPropagation() {
@@ -52,9 +44,6 @@ public class PortalPropagation implements ServerTickEvents.EndTick {
     // for me the usual minecraft tickets don't work, and I wasn't able to get them work, therefore, I have to force-load the tickets
     public record PropagetedTicket(RegistryKey<World> world, ChunkPos pos) { }
     private final static Map<PropagetedTicket, Integer> propagatedTickets = new HashMap<>();
-    public static final ChunkTicketType<BlockPos> ENDERWORLD_PORTAL_TICKET = ChunkTicketType.create(
-            "enderworld_portal", BlockPos::compareTo, 300
-    );
     public static final Set<Identifier> PROPAGATION_WHITELIST = Set.of(
             new Identifier("minecraft:overworld"),
             new Identifier(EnderGenesis.MOD_ID, "enderworld")
@@ -70,12 +59,12 @@ public class PortalPropagation implements ServerTickEvents.EndTick {
         assert false;
         return Objects.requireNonNull(null);
     }
-    public static void propagatePortalTicket(
+    public static void propagateEnderworldPortalTicket(
             ServerWorld world,
             WorldChunk chunk,
             BlockPos portalPos
     ) {
-        if (!checkTicketPropagationValid(
+        if (!checkEnderworldTicketPropagationValid(
                 world, chunk, portalPos
         )) {
             return;
@@ -85,7 +74,16 @@ public class PortalPropagation implements ServerTickEvents.EndTick {
                 toLoadChunkBlockPos(world.getServer(), world.getRegistryKey(), portalPos)
         );
     }
-    public static boolean checkTicketPropagationValid(
+    public static void propagateOneWayPortalTicket(MinecraftServer server, ServerWorld world, BlockPos portalPos) {
+        if (!world.getRegistryKey().equals(ModWorlds.getInfo(server).enderworldKey())) {
+            return;
+        }
+        PortalPropagation.loadChunk(
+                server.getOverworld(),
+                toLoadChunkBlockPos(server, world.getRegistryKey(), portalPos)
+        );
+    }
+    public static boolean checkEnderworldTicketPropagationValid(
             ServerWorld world,
             WorldChunk chunk,
             BlockPos pos

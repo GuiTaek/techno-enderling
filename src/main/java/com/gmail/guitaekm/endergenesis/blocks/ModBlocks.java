@@ -87,6 +87,13 @@ public class ModBlocks {
                     .nonOpaque()
 
     );
+    public static final BlockEntityType<OneWayPortalEntity> ONE_WAY_PORTAL_ENTITY = Registry.register(
+            Registry.BLOCK_ENTITY_TYPE,
+            new Identifier(EnderGenesis.MOD_ID, "one_way_portal_entity"),
+            FabricBlockEntityTypeBuilder
+                    .create(OneWayPortalEntity::new, ONE_WAY_PORTAL_BLOCK)
+                    .build()
+    );
     public static void register() {
         Registry.register(
                 Registry.BLOCK,
